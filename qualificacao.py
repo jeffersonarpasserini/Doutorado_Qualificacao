@@ -40,7 +40,7 @@ tf.random.set_seed(SEED)
 np.random.seed(SEED)
 
 DATASET_PATH = "/home/jeffersonpasserini/dados/ProjetosPos/via-dataset/images/"
-
+RESULT_PATH = "/home/jeffersonpasserini/dados/ProjetosPos/Doutorado_Qualificacao/results/"
 
 def load_data():
     filenames = os.listdir(DATASET_PATH)
@@ -236,9 +236,10 @@ def feature_model_extract(model_type):
     
     start = time.time()
     
+    print('Extract features '+model_type+" \n")
+    
     #extracting features
-    if model_type=='VGG16+VGG19':
-        print('Extract features '+model_type)       
+    if model_type=='VGG16+VGG19':           
         model_type = 'VGG16'
         modelVGG16, preprocessing_functionVGG16, image_sizeVGG16 = create_model(model_type)
         features_VGG16 = extract_features(df, modelVGG16, preprocessing_functionVGG16, image_sizeVGG16)
@@ -251,7 +252,6 @@ def feature_model_extract(model_type):
         features = np.hstack((features_VGG16,features_VGG19))
         
     elif model_type=='Xception+ResNet50':
-        print('Extract features '+model_type)       
         model_type = 'Xception'
         modelXc, preprocessing_functionXc, image_sizeXc = create_model(model_type)
         features_Xc = extract_features(df, modelXc, preprocessing_functionXc, image_sizeXc)
@@ -264,7 +264,6 @@ def feature_model_extract(model_type):
         features = np.hstack((features_Xc,features_Rn))
 
     else: 
-        print('Extract features '+model_type)       
         model, preprocessing_function, image_size = create_model(model_type)
         features = extract_features(df, model, preprocessing_function, image_size)
         
@@ -284,24 +283,23 @@ def dimensinality_reduction(model_type_reduction, number_components, allfeatures
     
     start = time.time()
     
+    print("dimensionality reduction: "+model_type_reduction+" \n")
     if (model_type_reduction=='PCA'):
-        print("dimensionality reduction: "+model_type_reduction)
         reduction = decomposition.PCA(n_components=number_components)
         components = reduction.fit_transform(allfeatures_Reduction)
         
     elif (model_type_reduction=='UMAP'):
-        print("dimensionality reduction: "+model_type_reduction)
         reducer = umap.UMAP(n_neighbors=20, min_dist=0.1, n_components=number_components, metric='euclidean')
         components = reducer.fit_transform(allfeatures_Reduction)
     
     elif (model_type_reduction=='RELIEFF'):
-        print("Error: Model not implemented.")
+        print("Error: Model not implemented. \n")
         
     elif (model_type_reduction=='None'):
-        print("Processing with all features extracted...")
+        print("Processing with all features extracted... \n")
         components = allfeatures_Reduction
               
-    else: print("Error: Model not implemented.")
+    else: print("Error: Model not implemented. \n")
         
     
     end = time.time()
@@ -313,7 +311,7 @@ def dimensinality_reduction(model_type_reduction, number_components, allfeatures
 def classification(train_data, train_label, test_data, model_classifier):
     
     if (model_classifier=='PCC'):
-        print("Classification - "+model_classifier)
+        print("Classification - "+model_classifier+" \n")
         
         time_trainning = 0
         start = time.time()
@@ -324,29 +322,30 @@ def classification(train_data, train_label, test_data, model_classifier):
         time_prediction = end-start
     
     elif (model_classifier=='J48'):
-        print("Classification - "+model_classifier)
+        print("Classification - "+model_classifier +" \n")
         
         
-    else: print("Error: Model not implemented.")
+    else: print("Error: Model not implemented. \n")
         
     return time_trainning, time_prediction, classification_result
     
     
 
 #----------------------- Main ------------------------------------------------
-model_type_list = ['Xception+ResNet50','VGG16+VGG19', 'Xception', 'VGG16', 'VGG19', 'ResNet50', 'ResNet101', 
-        'ResNet152','ResNet50V2', 'ResNet101V2', 'ResNet152V2', "InceptionV3",
-        'InceptionResNetV2', 'MobileNet', 'DenseNet121', 'DenseNet169',
-        'DenseNet201', 'NASNetMobile', 'MobileNetV2',
-        'EfficientNetB0', 'EfficientNetB1', 'EfficientNetB2', 
-        'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
-        'EfficientNetB6', 'EfficientNetB7']
+#model_type_list = ['Xception+ResNet50','VGG16+VGG19', 'Xception', 'VGG16', 'VGG19', 'ResNet50', 'ResNet101', 
+#        'ResNet152','ResNet50V2', 'ResNet101V2', 'ResNet152V2', "InceptionV3",
+#        'InceptionResNetV2', 'MobileNet', 'DenseNet121', 'DenseNet169',
+#        'DenseNet201', 'NASNetMobile', 'MobileNetV2',
+#        'EfficientNetB0', 'EfficientNetB1', 'EfficientNetB2', 
+#        'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
+#        'EfficientNetB6', 'EfficientNetB7']
 
+model_type_list = ['Xception+ResNet50']
 
 #model_reduction_dim_list = ['PCA', 'UMAP', 'ReliefF', 'mRMR','None'] #mRMR Minimum redundancy feature selection
 model_reduction_dim_list = ['PCA', 'UMAP'] #mRMR Minimum redundancy feature selection
 number_reduce_components=24
-scaled_feat_reduction = 'No' # Yes or No
+scaled_feat_reduction = 'Yes' # Yes or No
 
 #model_classifier_list = ['PCC', 'J48', 'SMO', 'MLP', 'Logistic', 'RBF']
 model_classifier_list = ['PCC']
@@ -360,11 +359,11 @@ v_delta_v=0.1
 v_max_iter=1000000
 
 # create filenames
-data_filename = "data_detailed.csv"
-data_acc_filename = "acc_resume.csv"
-data_f1_filename = "f1_resume.csv"
-data_roc_filename = "roc_resume.csv"
-data_time_filename = "time_resume.csv"
+data_filename = RESULT_PATH+"data_detailed.csv"
+data_acc_filename = RESULT_PATH+"acc_resume.csv"
+data_f1_filename = RESULT_PATH+"f1_resume.csv"
+data_roc_filename = RESULT_PATH+"roc_resume.csv"
+data_time_filename = RESULT_PATH+"time_resume.csv"
 
 #load data
 df = load_data()
@@ -382,15 +381,15 @@ kf.split(df)
 #CNN loop
 for model_type in model_type_list:
     
-    print("Pre processing...")
+    print(model_type + " Pre processing... \n")
     features, time_feature_extration = feature_model_extract(model_type)
-    print('time feature extraction --> '+str(time_feature_extration))
+    print('time feature extraction --> '+str(time_feature_extration) + " \n")
 
     #reduction loop
     for model_dimension_reduction in model_reduction_dim_list:
         
         components, time_reduction = dimensinality_reduction(model_dimension_reduction, number_reduce_components,features,scaled_feat_reduction)
-        print('time reduction --> '+str(time_reduction))
+        print('time reduction --> '+str(time_reduction) + " \n")
         
         #classifier loop
         for model_classifier in model_classifier_list:
@@ -402,7 +401,7 @@ for model_type in model_type_list:
             data_time_trainning = []
             data_time_prediction = []
         
-            print(model_type + " >> " + model_dimension_reduction + " >> " + model_classifier + "------------------")
+            print(model_type + " >> " + model_dimension_reduction + " >> " + model_classifier + " \n")
             #kfold loop
             for index, [train, test] in enumerate(kf.split(df)):
             
@@ -421,8 +420,7 @@ for model_type in model_type_list:
                     dataset_train, dataset_train_label, dataset_test, dataset_test_label = gen_dataset(features, train, test)
                     time_trainning, time_prediction, pred = classification(dataset_train, dataset_train_label, dataset_test, model_classifier)
                 
-                print('index: '+str(index) + 'Trainning --> '+str(time_trainning) + 'Prediction --> '+str(time_prediction))
-                print()
+                print('Kfold: '+str(index) + ' - Trainning --> '+str(time_trainning) + ' - Prediction --> '+str(time_prediction))
                 
                 #SEPARATE PREDICTED SAMPLES
                 if (model_classifier == 'PCC'):
@@ -438,56 +436,59 @@ for model_type in model_type_list:
                     f_data.write(model_dimension_reduction+", ") #Reduction_alg
                     f_data.write(model_classifier+", ") #Classifier
                     f_data.write(str(index+1)+", ") #Kfold index
-                    f_data.write( "'"+str(np.shape(features))+"', " ) #CNN_features
+                    f_data.write(str(np.shape(features)[1])+", " ) #CNN_features
                     f_data.write(scaled_feat_reduction+", ") #Reduction_Scaled
-                    f_data.write( "'"+str(np.shape(components))+"', " ) #Reduction_Components
+                    f_data.write(str(np.shape(components)[1])+", " ) #Reduction_Components
                     f_data.write(str(n_knn_neighbors)+", ")  #k_neigh_PCC_classifier
-                    f_data.write(str(accuracy_score(hidden_labels,hidden_pred)*100)+", ") #Acc Score
-                    f_data.write(str(f1_score(hidden_labels,hidden_pred)*100)+", ") #F1 Score
-                    f_data.write(str(roc_auc_score(hidden_labels,hidden_pred)*100)+", ") #ROC Score
-                    f_data.write(str(time_feature_extration)+", ") #Time Extraction Features
-                    f_data.write(str(time_reduction)+", ") #Time Reduction dimensionality
-                    f_data.write(str(time_trainning)+", ") #Time Classifier Trainning
-                    f_data.write(str(time_prediction)+", \n") #Time Classifier Predict
+                    f_data.write(str("{0:.4f}".format(accuracy_score(hidden_labels,hidden_pred)*100))+", ") #Acc Score
+                    f_data.write(str("{0:.4f}".format(f1_score(hidden_labels,hidden_pred)*100))+", ") #F1 Score
+                    f_data.write(str("{0:.4f}".format(roc_auc_score(hidden_labels,hidden_pred)*100))+", ") #ROC Score
+                    f_data.write(str("{0:.4f}".format(time_feature_extration))+", ") #Time Extraction Features
+                    f_data.write(str("{0:.4f}".format(time_reduction))+", ") #Time Reduction dimensionality
+                    f_data.write(str("{0:.4f}".format(time_trainning))+", ") #Time Classifier Trainning
+                    f_data.write(str("{0:.4f}".format(time_prediction))+", \n") #Time Classifier Predict
                     
                 #PRINT ACCURACY SCORE
-                print("Comp:" + str(number_reduce_components) + " -knn:" + str(n_knn_neighbors) + " Exec:" + str(index) + " - Acc Score:" + "{0:.4f}".format(accuracy_score(hidden_labels,hidden_pred)) + " f1 Score:" + "{0:.4f}".format(f1_score(hidden_labels,hidden_pred)) + " ROC Score:" + "{0:.4f}".format(roc_auc_score(hidden_labels,hidden_pred)) + " Execution Time: " + "{0:.4f}".format(time_prediction+time_trainning) +'s')
+                print("\n Comp:" + str(number_reduce_components) + " -knn:" + str(n_knn_neighbors) + " Exec:" + str(index) + " - Acc Score:" + "{0:.4f}".format(accuracy_score(hidden_labels,hidden_pred)) + " f1 Score:" + "{0:.4f}".format(f1_score(hidden_labels,hidden_pred)) + " ROC Score:" + "{0:.4f}".format(roc_auc_score(hidden_labels,hidden_pred)) + " Execution Time: " + "{0:.4f}".format(time_prediction+time_trainning) +'s')
                 
                 #score's log
                 data_time_prediction.append(time_prediction)
                 data_time_trainning.append(time_trainning)
-                acc_score.append(accuracy_score(hidden_labels,hidden_pred))
-                roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
-                f1c_score.append(f1_score(hidden_labels,hidden_pred))
+                acc_score.append("{0:.4f}".format(accuracy_score(hidden_labels,hidden_pred)))
+                roc_score.append("{0:.4f}".format(roc_auc_score(hidden_labels,hidden_pred)))
+                f1c_score.append("{0:.4f}".format(f1_score(hidden_labels,hidden_pred)))
                 
                 print("-------------------------------------------------------------------------------------------------------")
 
-#log acc 
-with open(data_acc_filename,"a+") as f_acc_csv:
-    f_acc_csv.write(model_type+", ") #CNN
-    f_acc_csv.write(model_dimension_reduction+", ") #Reduction_alg
-    f_acc_csv.write(model_classifier+", ") #Classifier
-    for acc in acc_score:
-        f_acc_csv.write(str("%.4f" % acc)+", ")
-    f_acc_csv.write("\n")
-    
-#log f1 score
-with open(data_f1_filename,"a+") as f_f1_csv:
-    f_f1_csv.write(model_type+", ") #CNN
-    f_f1_csv.write(model_dimension_reduction+", ") #Reduction_alg
-    f_f1_csv.write(model_classifier+", ") #Classifier
-    for f1sc in f1c_score:
-        f_f1_csv.write(str("%.4f" % f1sc)+", ")
-    f_f1_csv.write("\n")
-    
-#log roc score
-with open(data_roc_filename,"a+") as f_roc_csv:
-    f_roc_csv.write(model_type+", ") #CNN
-    f_roc_csv.write(model_dimension_reduction+", ") #Reduction_alg
-    f_roc_csv.write(model_classifier+", ") #Classifier
-    for roc_sc in roc_score:
-        f_roc_csv.write(str("%.4f" % roc_sc)+", ")
-    f_roc_csv.write("\n")
+        #log acc 
+        with open(data_acc_filename,"a+") as f_acc_csv:
+            f_acc_csv.write(model_type+", ") #CNN
+            f_acc_csv.write(model_dimension_reduction+", ") #Reduction_alg
+            f_acc_csv.write(scaled_feat_reduction+", ")
+            f_acc_csv.write(model_classifier+", ") #Classifier
+            for acc in acc_score:
+                f_acc_csv.write(str(acc)+", ")
+            f_acc_csv.write("\n")
+            
+        #log f1 score
+        with open(data_f1_filename,"a+") as f_f1_csv:
+            f_f1_csv.write(model_type+", ") #CNN
+            f_f1_csv.write(model_dimension_reduction+", ") #Reduction_alg
+            f_f1_csv.write(scaled_feat_reduction+", ")
+            f_f1_csv.write(model_classifier+", ") #Classifier
+            for f1sc in f1c_score:
+                f_f1_csv.write(str(f1sc)+", ")
+            f_f1_csv.write("\n")
+            
+        #log roc score
+        with open(data_roc_filename,"a+") as f_roc_csv:
+            f_roc_csv.write(model_type+", ") #CNN
+            f_roc_csv.write(model_dimension_reduction+", ") #Reduction_alg
+            f_roc_csv.write(scaled_feat_reduction+", ")
+            f_roc_csv.write(model_classifier+", ") #Classifier
+            for roc_sc in roc_score:
+                f_roc_csv.write(str(roc_sc)+", ")
+            f_roc_csv.write("\n")
 
 
 
