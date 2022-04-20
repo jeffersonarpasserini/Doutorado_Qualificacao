@@ -24,6 +24,8 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from sklearn.model_selection import RepeatedKFold
 from sklearn.preprocessing import StandardScaler
 from pcc import ParticleCompetitionAndCooperation
+from sklearn.tree import DecisionTreeClassifier #J48
+from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import f1_score
 from sklearn.metrics import roc_auc_score
@@ -301,9 +303,7 @@ def dimensinality_reduction(model_type_reduction, number_components, allfeatures
               
     else: print("Error: Model not implemented. \n")
         
-    
     end = time.time()
-    
     time_reduction = end-start
     
     return components, time_reduction
@@ -323,7 +323,29 @@ def classification(train_data, train_label, test_data, model_classifier):
     
     elif (model_classifier=='J48'):
         print("Classification - "+model_classifier +" \n")
+        start = time.time()
+        clf = DecisionTreeClassifier()        
+        clf = clf.fit(train_data,train_label)
+        end = time.time()
+        time_trainning = end-start
         
+        start = time.time()
+        classification_result = clf.predict(test_data)        
+        end = time.time()
+        time_prediction = end-start
+    
+    elif (model_classifier=='RBF'):
+        print("Classification - "+model_classifier +" \n")
+        start = time.time()
+        clf = SVC(kernel='rbf')
+        clf = clf.fit(train_data, train_label)
+        end = time.time()
+        time_trainning = end-start
+        
+        start = time.time()
+        classification_result = clf.predict(test_data)        
+        end = time.time()
+        time_prediction = end-start
         
     else: print("Error: Model not implemented. \n")
         
@@ -348,7 +370,7 @@ number_reduce_components=24
 scaled_feat_reduction = 'Yes' # Yes or No
 
 #model_classifier_list = ['PCC', 'J48', 'SMO', 'MLP', 'Logistic', 'RBF']
-model_classifier_list = ['PCC']
+model_classifier_list = ['RBF']
 
 
 #PCC parameters
@@ -417,7 +439,7 @@ for model_type in model_type_list:
                     time_trainning, time_prediction, pred = classification(masked_labels, dataset_train_label, dataset_test, model_classifier)
                     
                 else:
-                    dataset_train, dataset_train_label, dataset_test, dataset_test_label = gen_dataset(features, train, test)
+                    dataset_train, dataset_train_label, dataset_test, dataset_test_label = gen_dataset(features, labels, train, test) 
                     time_trainning, time_prediction, pred = classification(dataset_train, dataset_train_label, dataset_test, model_classifier)
                 
                 print('Kfold: '+str(index) + ' - Trainning --> '+str(time_trainning) + ' - Prediction --> '+str(time_prediction))
