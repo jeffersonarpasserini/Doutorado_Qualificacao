@@ -459,13 +459,13 @@ model_type_list = ['Xception+ResNet50']
 
 #model_reduction_dim_list = ['PCA', 'UMAP', 'ReliefF', 'mRMR','None'] #mRMR Minimum redundancy feature selection
 model_reduction_dim_list = ['ReliefF'] #mRMR Minimum redundancy feature selection
-number_reduce_components=24
+number_reduce_components=1
 scaled_feat_reduction = 'No' # Yes or No
 
 #model_classifier_list = ['SMO']
 #model_classifier_list = ['PCC', 'J48', 'RBF', 'LinearSVM','MLP','Logistic','RandomForest','Adaboost','Gaussian']
-#model_classifier_list = ['Logistic']
-model_classifier_list = ['PCC']
+model_classifier_list = ['Logistic']
+#model_classifier_list = ['PCC']
 
 #PCC parameters
 perc_samples = 0.1
@@ -502,7 +502,6 @@ for model_type in model_type_list:
 
     #reduction loop
     for model_dimension_reduction in model_reduction_dim_list:
-        
         #dimensionality reduction - UMAP or PCA
         if (model_dimension_reduction == 'PCA' or model_dimension_reduction == 'UMAP'):
             allfeat, time_reduction = dimensinality_reduction(model_dimension_reduction, number_reduce_components,features,scaled_feat_reduction)
@@ -528,10 +527,7 @@ for model_type in model_type_list:
                                                                                                                                                                   
                 #gera dataset's 
                 dataset_train, dataset_train_label, dataset_test, dataset_test_label = gen_dataset(allfeat, labels, train, test) 
-                #all features for pcc classifier
-                components = allfeat.copy() 
-                #mask labels for PCC classifier
-                masked_labels = hideLabels(labels,test)
+                
                 
                 #feature selection
                 if (model_dimension_reduction == 'ReliefF'):
@@ -553,23 +549,25 @@ for model_type in model_type_list:
                     
                     time_reduction = time.time()-time_start
                     print("feature selection: "+model_dimension_reduction+" time --> "+"{0:.4f}".format(time_reduction) + " \n")
-                                                       
+                elif ((model_dimension_reduction == 'PCA' or model_dimension_reduction == "UMAP") and model_classifier == "PCC"):
+                    components_train = allfeat.copy()
+                    #mask labels for PCC classifier
+                    masked_labels = hideLabels(labels,test)
                                  
                 #run classification   
-                if(model_classifier == 'PCC'):                     
+                if(model_classifier == 'PCC'):
                     #run classifier
-                    time_trainning, time_prediction, pred = classification_pcc(components,masked_labels,n_knn_neighbors)
+                    time_trainning, time_prediction, pred = classification_pcc(components_train,masked_labels,n_knn_neighbors)
                     #calc acc results
                     hidden_labels = np.array(labels[masked_labels == -1]).astype(int)
                     hidden_pred = pred[masked_labels == -1]
-                    
                 else:
                     time_trainning, time_prediction, pred = classification(dataset_train, dataset_train_label, dataset_test, model_classifier)
                     hidden_labels = dataset_test_label.copy()
                     hidden_pred = pred.copy()
                 
                 
-                print(model_type + " >> " + model_dimension_reduction + " >> " + model_classifier + ': Kfold: '+str(index) + ' - Trainning --> '+"{0:.4f}".format(time_trainning) + ' - Prediction --> '+"{0:.4f}".format(time_prediction)+"\n")
+                print(model_type + " >> " + model_dimension_reduction + " >> " + model_classifier + ': Kfold: '+str(index+1) + ' - Trainning --> '+"{0:.4f}".format(time_trainning) + ' - Prediction --> '+"{0:.4f}".format(time_prediction)+"\n")
                                  
                 #score's log
                 data_time_prediction.append(time_prediction)
@@ -587,8 +585,11 @@ for model_type in model_type_list:
                     f_data.write(str(index+1)+", ") #Kfold index
                     f_data.write(str(np.shape(features)[1])+", " ) #CNN_features
                     f_data.write(scaled_feat_reduction+", ") #Reduction_Scaled
-                    f_data.write(str(np.shape(components)[1])+", " ) #Reduction_Components
-                    f_data.write(str(n_knn_neighbors)+", ")  #k_neigh_PCC_classifier
+                    f_data.write(str(np.shape(components_train)[1])+", " ) #Reduction_Components
+                    if(model_classifier=="PCC"):
+                        f_data.write(str(n_knn_neighbors)+", ")  #k_neigh_PCC_classifier
+                    else:
+                        f_data.write(str(0)+", ") 
                     f_data.write(str("{0:.4f}".format(accuracy_score(hidden_labels,hidden_pred)*100))+", ") #Acc Score
                     f_data.write(str("{0:.4f}".format(f1_score(hidden_labels,hidden_pred)*100))+", ") #F1 Score
                     f_data.write(str("{0:.4f}".format(roc_auc_score(hidden_labels,hidden_pred)*100))+", ") #ROC Score
@@ -606,6 +607,7 @@ for model_type in model_type_list:
                 f_acc_csv.write(model_type+", ") #CNN
                 f_acc_csv.write(model_dimension_reduction+", ") #Reduction_alg
                 f_acc_csv.write(scaled_feat_reduction+", ")
+                f_acc_csv.write(str(np.shape(components_train)[1])+", " ) #Reduction_Components
                 f_acc_csv.write(model_classifier+", ") #Classifier
                 for acc in acc_score:
                     f_acc_csv.write("{0:.4f}".format(acc)+", ")
@@ -618,6 +620,7 @@ for model_type in model_type_list:
                 f_f1_csv.write(model_type+", ") #CNN
                 f_f1_csv.write(model_dimension_reduction+", ") #Reduction_alg
                 f_f1_csv.write(scaled_feat_reduction+", ")
+                f_f1_csv.write(str(np.shape(components_train)[1])+", " ) #Reduction_Components
                 f_f1_csv.write(model_classifier+", ") #Classifier
                 for f1sc in f1c_score:
                     f_f1_csv.write("{0:.4f}".format(f1sc)+", ")
@@ -630,6 +633,7 @@ for model_type in model_type_list:
                 f_roc_csv.write(model_type+", ") #CNN
                 f_roc_csv.write(model_dimension_reduction+", ") #Reduction_alg
                 f_roc_csv.write(scaled_feat_reduction+", ")
+                f_roc_csv.write(str(np.shape(components_train)[1])+", " ) #Reduction_Components
                 f_roc_csv.write(model_classifier+", ") #Classifier
                 for roc_sc in roc_score:
                     f_roc_csv.write("{0:.4f}".format(roc_sc)+", ")
