@@ -545,10 +545,11 @@ for model_type in model_type_list:
                         #mask labels dataset test
                         mklabels = dataset_test_label.copy()
                         for x in range(len(mklabels)):
+                            print('valor '+str(mklabels[x]))
                             mklabels[x] = -1
                                                    
                         #remount masked_labels                            
-                        masked_labels = np.vstack((dataset_train_label,mklabels))
+                        masked_labels = np.hstack((dataset_train_label,mklabels))
                     
                     time_reduction = time.time()-time_start
                     print("feature selection: "+model_dimension_reduction+" time --> "+"{0:.4f}".format(time_reduction) + " \n")
