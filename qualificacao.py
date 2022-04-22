@@ -11,22 +11,31 @@ Created on Tue Nov  9 10:28:00 2021
 
 3 - Classification with n classifiers
 """
-
+#base libraries
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 import random
 import time
-import umap
 import os
-from sklearn import decomposition
+#transformation
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from sklearn.model_selection import RepeatedKFold
 from sklearn.preprocessing import StandardScaler
+#dimensionality reduction
+from sklearn import decomposition
+import umap
+#feature selection
+from ReliefF import ReliefF
+#classifier's
 from pcc import ParticleCompetitionAndCooperation
 from sklearn.tree import DecisionTreeClassifier #J48
 from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.naive_bayes import GaussianNB
+#metrics
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import f1_score
 from sklearn.metrics import roc_auc_score
@@ -291,9 +300,6 @@ def dimensinality_reduction(model_type_reduction, number_components, allfeatures
     elif (model_type_reduction=='UMAP'):
         reducer = umap.UMAP(n_neighbors=20, min_dist=0.1, n_components=number_components, metric='euclidean')
         components = reducer.fit_transform(allfeatures_Reduction)
-    
-    elif (model_type_reduction=='RELIEFF'):
-        print("Error: Model not implemented. \n")
         
     elif (model_type_reduction=='None'):
         print("Processing with all features extracted... \n")
@@ -306,18 +312,39 @@ def dimensinality_reduction(model_type_reduction, number_components, allfeatures
     
     return components, time_reduction
 
+def feature_selection(X_train, y_train, X_test, model_type_selection, number_components):
+    
+    start = time.time()
+    
+    if (model_type_selection=='ReliefF'):
+        #trainning feature selection
+         reducer = ReliefF(n_features_to_keep=number_components)
+         components_train = reducer.fit_transform(X_train,y_train)
+         components_test = reducer.transform(X_test)
+         
+    else: print("Error: Model not implemented. \n")
+        
+    end = time.time()
+    time_reduction = end-start
+    
+    return components_train, components_test, time_reduction
+    
+
+def classification_pcc(feat_pcc,labels_masked,n_neighbors):
+    time_trainning = 0
+    start = time.time()
+    model = ParticleCompetitionAndCooperation()
+    model.build_graph(feat_pcc,k_nn=n_neighbors)
+    classification_result = np.array(model.fit_predict(labels_masked, p_grd=v_p_grd, delta_v=v_delta_v, max_iter=v_max_iter))
+    end = time.time()
+    time_prediction = end-start
+    
+    return time_trainning, time_prediction, classification_result
+    
+
 def classification(train_data, train_label, test_data, model_classifier):
     
-    if (model_classifier=='PCC'):
-        time_trainning = 0
-        start = time.time()
-        model = ParticleCompetitionAndCooperation()
-        model.build_graph(components,k_nn=n_knn_neighbors)
-        classification_result = np.array(model.fit_predict(train_data, p_grd=v_p_grd, delta_v=v_delta_v, max_iter=v_max_iter))
-        end = time.time()
-        time_prediction = end-start
-    
-    elif (model_classifier=='J48'):
+    if (model_classifier=='J48'):
         start = time.time()
         clf = DecisionTreeClassifier()        
         clf = clf.fit(train_data,train_label)
@@ -355,7 +382,7 @@ def classification(train_data, train_label, test_data, model_classifier):
         
     elif (model_classifier=='MLP'):
         start = time.time()
-        clf = MLPClassifier()
+        clf = MLPClassifier(random_state=1, max_iter=1000)
         clf = clf.fit(train_data, train_label)
         end = time.time()
         time_trainning = end-start
@@ -365,6 +392,53 @@ def classification(train_data, train_label, test_data, model_classifier):
         end = time.time()
         time_prediction = end-start
     
+    elif (model_classifier=='Logistic'):
+        start = time.time()
+        clf = LogisticRegression(max_iter=500)
+        clf = clf.fit(train_data, train_label)
+        end = time.time()
+        time_trainning = end-start
+        
+        start = time.time()
+        classification_result = clf.predict(test_data)        
+        end = time.time()
+        time_prediction = end-start
+        
+    elif (model_classifier=='RandomForest'):
+        start = time.time()
+        clf = RandomForestClassifier()
+        clf = clf.fit(train_data, train_label)
+        end = time.time()
+        time_trainning = end-start
+        
+        start = time.time()
+        classification_result = clf.predict(test_data)        
+        end = time.time()
+        time_prediction = end-start
+        
+    elif (model_classifier=='Adaboost'):
+        start = time.time()
+        clf = AdaBoostClassifier()
+        clf = clf.fit(train_data, train_label)
+        end = time.time()
+        time_trainning = end-start
+        
+        start = time.time()
+        classification_result = clf.predict(test_data)        
+        end = time.time()
+        time_prediction = end-start
+    
+    elif (model_classifier=='Gaussian'):
+        start = time.time()
+        clf = GaussianNB()
+        clf = clf.fit(train_data, train_label)
+        end = time.time()
+        time_trainning = end-start
+        
+        start = time.time()
+        classification_result = clf.predict(test_data)        
+        end = time.time()
+        time_prediction = end-start
         
     else: print("Error: Model not implemented. \n")
         
@@ -384,14 +458,14 @@ def classification(train_data, train_label, test_data, model_classifier):
 model_type_list = ['Xception+ResNet50']
 
 #model_reduction_dim_list = ['PCA', 'UMAP', 'ReliefF', 'mRMR','None'] #mRMR Minimum redundancy feature selection
-model_reduction_dim_list = ['PCA', 'UMAP'] #mRMR Minimum redundancy feature selection
+model_reduction_dim_list = ['ReliefF'] #mRMR Minimum redundancy feature selection
 number_reduce_components=24
 scaled_feat_reduction = 'No' # Yes or No
 
-#model_classifier_list = ['PCC', 'J48', 'RBF', 'LinearSVM', 'SMO', 'MLP', 'Logistic' ]
-#model_classifier_list = ['PCC', 'J48', 'RBF', 'LinearSVM','MLP']
-model_classifier_list = ['MLP']
-
+#model_classifier_list = ['SMO']
+#model_classifier_list = ['PCC', 'J48', 'RBF', 'LinearSVM','MLP','Logistic','RandomForest','Adaboost','Gaussian']
+#model_classifier_list = ['Logistic']
+model_classifier_list = ['PCC']
 
 #PCC parameters
 perc_samples = 0.1
@@ -429,9 +503,15 @@ for model_type in model_type_list:
     #reduction loop
     for model_dimension_reduction in model_reduction_dim_list:
         
-        components, time_reduction = dimensinality_reduction(model_dimension_reduction, number_reduce_components,features,scaled_feat_reduction)
-        print("dimensionality reduction: "+model_dimension_reduction+" time reduction --> "+"{0:.4f}".format(time_reduction) + " \n")
+        #dimensionality reduction - UMAP or PCA
+        if (model_dimension_reduction == 'PCA' or model_dimension_reduction == 'UMAP'):
+            allfeat, time_reduction = dimensinality_reduction(model_dimension_reduction, number_reduce_components,features,scaled_feat_reduction)
+        else:
+            allfeat = features.copy()
+            time_reduction = 0
         
+        print("dimensionality reduction: "+model_dimension_reduction+" time reduction --> "+"{0:.4f}".format(time_reduction) + " \n")
+                 
         #classifier loop
         for model_classifier in model_classifier_list:
     
@@ -439,36 +519,64 @@ for model_type in model_type_list:
             acc_score = []
             roc_score = []
             f1c_score = []
+            data_time_reduction = []
             data_time_trainning = []
             data_time_prediction = []
         
             #kfold loop
             for index, [train, test] in enumerate(kf.split(df)):
-            
-                dataset_train = [] 
-                dataset_train_label = []
-                dataset_test = [] 
-                dataset_test_label = []
+                                                                                                                                                                  
+                #gera dataset's 
+                dataset_train, dataset_train_label, dataset_test, dataset_test_label = gen_dataset(allfeat, labels, train, test) 
+                #all features for pcc classifier
+                components = allfeat.copy() 
+                #mask labels for PCC classifier
+                masked_labels = hideLabels(labels,test)
                 
-                #run classification
-                #mascarar os rotulos para gerar as amostras para o modelo
-                if(model_classifier == 'PCC'):
-                    masked_labels = hideLabels(labels,test)
-                    time_trainning, time_prediction, pred = classification(masked_labels, dataset_train_label, dataset_test, model_classifier)
+                #feature selection
+                if (model_dimension_reduction == 'ReliefF'):
+                    time_start = time.time()
                     
-                else:
-                    dataset_train, dataset_train_label, dataset_test, dataset_test_label = gen_dataset(features, labels, train, test) 
-                    time_trainning, time_prediction, pred = classification(dataset_train, dataset_train_label, dataset_test, model_classifier)
-                
-                print(model_type + " >> " + model_dimension_reduction + " >> " + model_classifier + ': Kfold: '+str(index) + ' - Trainning --> '+"{0:.4f}".format(time_trainning) + ' - Prediction --> '+"{0:.4f}".format(time_prediction)+"\n")
-                
-                #SEPARATE PREDICTED SAMPLES
-                if (model_classifier == 'PCC'):
+                    components_train, components_test, time_reduction = feature_selection(dataset_train, dataset_train_label, dataset_test, model_dimension_reduction, number_reduce_components)
+                    
+                    if(model_classifier == 'PCC'):
+                        components = np.vstack((components_train,components_test))
+                        
+                        #mask labels dataset test
+                        mklabels = dataset_test_label.copy()
+                        for x in range(len(mklabels)):
+                            mklabels[x] = -1
+                                                   
+                        #remount masked_labels                            
+                        masked_labels = np.vstack((dataset_train_label,mklabels))
+                    
+                    time_reduction = time.time()-time_start
+                    print("feature selection: "+model_dimension_reduction+" time --> "+"{0:.4f}".format(time_reduction) + " \n")
+                                                       
+                                 
+                #run classification   
+                if(model_classifier == 'PCC'):                     
+                    #run classifier
+                    time_trainning, time_prediction, pred = classification_pcc(components,masked_labels,n_knn_neighbors)
+                    #calc acc results
                     hidden_labels = np.array(labels[masked_labels == -1]).astype(int)
                     hidden_pred = pred[masked_labels == -1]
+                    
                 else:
+                    time_trainning, time_prediction, pred = classification(dataset_train, dataset_train_label, dataset_test, model_classifier)
                     hidden_labels = dataset_test_label.copy()
                     hidden_pred = pred.copy()
+                
+                
+                print(model_type + " >> " + model_dimension_reduction + " >> " + model_classifier + ': Kfold: '+str(index) + ' - Trainning --> '+"{0:.4f}".format(time_trainning) + ' - Prediction --> '+"{0:.4f}".format(time_prediction)+"\n")
+                                 
+                #score's log
+                data_time_prediction.append(time_prediction)
+                data_time_trainning.append(time_trainning)
+                data_time_reduction.append(time_reduction)
+                acc_score.append(accuracy_score(hidden_labels,hidden_pred))
+                roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
+                f1c_score.append(f1_score(hidden_labels,hidden_pred))
                 
                 #csv detailed data
                 with open(data_filename,"a+") as f_data:
@@ -490,14 +598,6 @@ for model_type in model_type_list:
                     
                 #PRINT ACCURACY SCORE
                 print("Comp:" + str(number_reduce_components) + " -knn:" + str(n_knn_neighbors) + " Exec:" + str(index) + " - Acc Score:" + "{0:.4f}".format(accuracy_score(hidden_labels,hidden_pred)) + " f1 Score:" + "{0:.4f}".format(f1_score(hidden_labels,hidden_pred)) + " ROC Score:" + "{0:.4f}".format(roc_auc_score(hidden_labels,hidden_pred)) + " Execution Time: " + "{0:.4f}".format(time_prediction+time_trainning) +'s')
-                
-                #score's log
-                data_time_prediction.append(time_prediction)
-                data_time_trainning.append(time_trainning)
-                acc_score.append(accuracy_score(hidden_labels,hidden_pred))
-                roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
-                f1c_score.append(f1_score(hidden_labels,hidden_pred))
-                
                 print("-------------------------------------------------------------------------------------------------------")
 
             #log acc 
