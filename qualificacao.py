@@ -5,9 +5,10 @@ Created on Tue Nov  9 10:28:00 2021
 
 @author: Jefferson Passerini / Fabricio Breve
 
-1 - Extract features from the input dataset using CNN
+1 - Extract features from the input dataset using CNNs
 
-2 - Dimensionality reduction array features PCA
+2 - Dimensionality reduction array features PCA/UMAP or 
+    Feature Selection with ReliefF / mRMR
 
 3 - Classification with n classifiers
 """
@@ -447,25 +448,29 @@ def classification(train_data, train_label, test_data, model_classifier):
     
 
 #----------------------- Main ------------------------------------------------
-#model_type_list = ['Xception+ResNet50','VGG16+VGG19', 'Xception', 'VGG16', 'VGG19', 'ResNet50', 'ResNet101', 
-#        'ResNet152','ResNet50V2', 'ResNet101V2', 'ResNet152V2', "InceptionV3",
-#        'InceptionResNetV2', 'MobileNet', 'DenseNet121', 'DenseNet169',
-#        'DenseNet201', 'NASNetMobile', 'MobileNetV2',
-#        'EfficientNetB0', 'EfficientNetB1', 'EfficientNetB2', 
-#        'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
-#        'EfficientNetB6', 'EfficientNetB7']
+model_type_list = ['Xception+ResNet50','VGG16+VGG19', 'Xception', 'VGG16', 'VGG19', 'ResNet50', 'ResNet101', 
+        'ResNet152','ResNet50V2', 'ResNet101V2', 'ResNet152V2', "InceptionV3",
+        'InceptionResNetV2', 'MobileNet', 'DenseNet121', 'DenseNet169',
+        'DenseNet201', 'NASNetMobile', 'MobileNetV2',
+        'EfficientNetB0', 'EfficientNetB1', 'EfficientNetB2', 
+        'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
+        'EfficientNetB6', 'EfficientNetB7']
 
-model_type_list = ['Xception+ResNet50']
+#----------------------- Main ------------------------------------------------
+#model_type_list = ['DenseNet169', 'DenseNet201', 'NASNetMobile', 'MobileNetV2',
+#                   'EfficientNetB0', 'EfficientNetB1', 'EfficientNetB2', 
+#                   'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
+#                   'EfficientNetB6', 'EfficientNetB7']
 
-#model_reduction_dim_list = ['PCA', 'UMAP', 'ReliefF', 'mRMR','None'] #mRMR Minimum redundancy feature selection
+#model_type_list = ['EfficientNetB6', 'EfficientNetB7']
+
+#model_reduction_dim_list = ['PCA', 'UMAP', 'ReliefF', 'mRMR','Full'] #mRMR Minimum redundancy feature selection
 model_reduction_dim_list = ['ReliefF'] #mRMR Minimum redundancy feature selection
 number_reduce_components=1
 scaled_feat_reduction = 'No' # Yes or No
 
 #model_classifier_list = ['SMO']
-#model_classifier_list = ['PCC', 'J48', 'RBF', 'LinearSVM','MLP','Logistic','RandomForest','Adaboost','Gaussian']
-model_classifier_list = ['Logistic']
-#model_classifier_list = ['PCC']
+model_classifier_list = ['PCC', 'J48', 'RBF', 'LinearSVM','MLP','Logistic','RandomForest','Adaboost','Gaussian']
 
 #PCC parameters
 perc_samples = 0.1
@@ -533,33 +538,33 @@ for model_type in model_type_list:
                 if (model_dimension_reduction == 'ReliefF'):
                     time_start = time.time()
                     
-                    components_train, components_test, time_reduction = feature_selection(dataset_train, dataset_train_label, dataset_test, model_dimension_reduction, number_reduce_components)
+                    dataset_train, dataset_test, time_reduction = feature_selection(dataset_train, dataset_train_label, dataset_test, model_dimension_reduction, number_reduce_components)
                     
                     if(model_classifier == 'PCC'):
-                        components = np.vstack((components_train,components_test))
+                        dataset_train = np.vstack((dataset_train,dataset_test))
                         
                         #mask labels dataset test
                         mklabels = dataset_test_label.copy()
                         for x in range(len(mklabels)):
-                            print('valor '+str(mklabels[x]))
                             mklabels[x] = -1
                                                    
                         #remount masked_labels                            
-                        masked_labels = np.hstack((dataset_train_label,mklabels))
+                        masked_labels = np.hstack((dataset_train_label,mklabels))                        
                     
                     time_reduction = time.time()-time_start
                     print("feature selection: "+model_dimension_reduction+" time --> "+"{0:.4f}".format(time_reduction) + " \n")
-                elif ((model_dimension_reduction == 'PCA' or model_dimension_reduction == "UMAP") and model_classifier == "PCC"):
-                    components_train = allfeat.copy()
+                elif ((model_dimension_reduction == 'PCA' or model_dimension_reduction == "UMAP" or model_dimension_reduction == "Full") and model_classifier == "PCC"):
+                    dataset_train = allfeat.copy()
                     #mask labels for PCC classifier
                     masked_labels = hideLabels(labels,test)
+                    dataset_test_label = np.array(labels[masked_labels == -1]).astype(int)
                                  
                 #run classification   
                 if(model_classifier == 'PCC'):
                     #run classifier
-                    time_trainning, time_prediction, pred = classification_pcc(components_train,masked_labels,n_knn_neighbors)
+                    time_trainning, time_prediction, pred = classification_pcc(dataset_train,masked_labels,n_knn_neighbors)
                     #calc acc results
-                    hidden_labels = np.array(labels[masked_labels == -1]).astype(int)
+                    hidden_labels = dataset_test_label.copy()
                     hidden_pred = pred[masked_labels == -1]
                 else:
                     time_trainning, time_prediction, pred = classification(dataset_train, dataset_train_label, dataset_test, model_classifier)
@@ -585,7 +590,7 @@ for model_type in model_type_list:
                     f_data.write(str(index+1)+", ") #Kfold index
                     f_data.write(str(np.shape(features)[1])+", " ) #CNN_features
                     f_data.write(scaled_feat_reduction+", ") #Reduction_Scaled
-                    f_data.write(str(np.shape(components_train)[1])+", " ) #Reduction_Components
+                    f_data.write(str(np.shape(dataset_train)[1])+", " ) #Reduction_Components
                     if(model_classifier=="PCC"):
                         f_data.write(str(n_knn_neighbors)+", ")  #k_neigh_PCC_classifier
                     else:
@@ -607,7 +612,7 @@ for model_type in model_type_list:
                 f_acc_csv.write(model_type+", ") #CNN
                 f_acc_csv.write(model_dimension_reduction+", ") #Reduction_alg
                 f_acc_csv.write(scaled_feat_reduction+", ")
-                f_acc_csv.write(str(np.shape(components_train)[1])+", " ) #Reduction_Components
+                f_acc_csv.write(str(np.shape(dataset_train)[1])+", " ) #Reduction_Components
                 f_acc_csv.write(model_classifier+", ") #Classifier
                 for acc in acc_score:
                     f_acc_csv.write("{0:.4f}".format(acc)+", ")
@@ -620,7 +625,7 @@ for model_type in model_type_list:
                 f_f1_csv.write(model_type+", ") #CNN
                 f_f1_csv.write(model_dimension_reduction+", ") #Reduction_alg
                 f_f1_csv.write(scaled_feat_reduction+", ")
-                f_f1_csv.write(str(np.shape(components_train)[1])+", " ) #Reduction_Components
+                f_f1_csv.write(str(np.shape(dataset_train)[1])+", " ) #Reduction_Components
                 f_f1_csv.write(model_classifier+", ") #Classifier
                 for f1sc in f1c_score:
                     f_f1_csv.write("{0:.4f}".format(f1sc)+", ")
@@ -633,7 +638,7 @@ for model_type in model_type_list:
                 f_roc_csv.write(model_type+", ") #CNN
                 f_roc_csv.write(model_dimension_reduction+", ") #Reduction_alg
                 f_roc_csv.write(scaled_feat_reduction+", ")
-                f_roc_csv.write(str(np.shape(components_train)[1])+", " ) #Reduction_Components
+                f_roc_csv.write(str(np.shape(dataset_train)[1])+", " ) #Reduction_Components
                 f_roc_csv.write(model_classifier+", ") #Classifier
                 for roc_sc in roc_score:
                     f_roc_csv.write("{0:.4f}".format(roc_sc)+", ")
