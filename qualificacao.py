@@ -457,16 +457,11 @@ model_type_list = ['Xception+ResNet50','VGG16+VGG19', 'Xception', 'VGG16', 'VGG1
         'EfficientNetB6', 'EfficientNetB7']
 
 #----------------------- Main ------------------------------------------------
-#model_type_list = ['DenseNet169', 'DenseNet201', 'NASNetMobile', 'MobileNetV2',
-#                   'EfficientNetB0', 'EfficientNetB1', 'EfficientNetB2', 
-#                   'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
-#                   'EfficientNetB6', 'EfficientNetB7']
-
-#model_type_list = ['EfficientNetB6', 'EfficientNetB7']
+model_type_list = ['DenseNet169', 'DenseNet201']
 
 #model_reduction_dim_list = ['PCA', 'UMAP', 'ReliefF', 'mRMR','Full'] #mRMR Minimum redundancy feature selection
-model_reduction_dim_list = ['ReliefF'] #mRMR Minimum redundancy feature selection
-number_reduce_components=1
+model_reduction_dim_list = ['PCA', 'UMAP'] #mRMR Minimum redundancy feature selection
+number_reduce_components=10
 scaled_feat_reduction = 'No' # Yes or No
 
 #model_classifier_list = ['SMO']
