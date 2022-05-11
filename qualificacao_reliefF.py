@@ -273,7 +273,79 @@ def feature_model_extract(model_type):
         
         #concatenate array features Xception+Resnet50
         features = np.hstack((features_Xc,features_Rn))
+    
+    elif model_type=='MobileNet+ResNet101':
+        model_type = 'MobileNet'
+        modelXc, preprocessing_functionXc, image_sizeXc = create_model(model_type)
+        features_Xc = extract_features(df, modelXc, preprocessing_functionXc, image_sizeXc)
+            
+        model_type = 'ResNet101'
+        modelRn, preprocessing_functionRn, image_sizeRn = create_model(model_type)
+        features_Rn = extract_features(df, modelRn, preprocessing_functionRn, image_sizeRn)
+        
+        #concatenate array features Xception+Resnet50
+        features = np.hstack((features_Xc,features_Rn))
+    
+    elif model_type=='ResNet101+DenseNet169':
+        model_type = 'ResNet101'
+        modelXc, preprocessing_functionXc, image_sizeXc = create_model(model_type)
+        features_Xc = extract_features(df, modelXc, preprocessing_functionXc, image_sizeXc)
+            
+        model_type = 'DenseNet169'
+        modelRn, preprocessing_functionRn, image_sizeRn = create_model(model_type)
+        features_Rn = extract_features(df, modelRn, preprocessing_functionRn, image_sizeRn)
+        
+        #concatenate array features Xception+Resnet50
+        features = np.hstack((features_Xc,features_Rn))
 
+    elif model_type=='ResNet101+DenseNet121':
+        model_type = 'ResNet101'
+        modelXc, preprocessing_functionXc, image_sizeXc = create_model(model_type)
+        features_Xc = extract_features(df, modelXc, preprocessing_functionXc, image_sizeXc)
+            
+        model_type = 'DenseNet121'
+        modelRn, preprocessing_functionRn, image_sizeRn = create_model(model_type)
+        features_Rn = extract_features(df, modelRn, preprocessing_functionRn, image_sizeRn)
+        
+        #concatenate array features Xception+Resnet50
+        features = np.hstack((features_Xc,features_Rn))
+        
+    elif model_type=='ResNet101+MobileNetV2':
+        model_type = 'ResNet101'
+        modelXc, preprocessing_functionXc, image_sizeXc = create_model(model_type)
+        features_Xc = extract_features(df, modelXc, preprocessing_functionXc, image_sizeXc)
+            
+        model_type = 'MobileNetV2'
+        modelRn, preprocessing_functionRn, image_sizeRn = create_model(model_type)
+        features_Rn = extract_features(df, modelRn, preprocessing_functionRn, image_sizeRn)
+        
+        #concatenate array features Xception+Resnet50
+        features = np.hstack((features_Xc,features_Rn))
+        
+    elif model_type=='EfficientNetB0+MobileNet':
+        model_type = 'EfficientNetB0'
+        modelXc, preprocessing_functionXc, image_sizeXc = create_model(model_type)
+        features_Xc = extract_features(df, modelXc, preprocessing_functionXc, image_sizeXc)
+            
+        model_type = 'MobileNet'
+        modelRn, preprocessing_functionRn, image_sizeRn = create_model(model_type)
+        features_Rn = extract_features(df, modelRn, preprocessing_functionRn, image_sizeRn)
+        
+        #concatenate array features Xception+Resnet50
+        features = np.hstack((features_Xc,features_Rn))
+    
+    elif model_type=='MobileNet+ResNet50':
+        model_type = 'MobileNet'
+        modelXc, preprocessing_functionXc, image_sizeXc = create_model(model_type)
+        features_Xc = extract_features(df, modelXc, preprocessing_functionXc, image_sizeXc)
+            
+        model_type = 'ResNet50'
+        modelRn, preprocessing_functionRn, image_sizeRn = create_model(model_type)
+        features_Rn = extract_features(df, modelRn, preprocessing_functionRn, image_sizeRn)
+        
+        #concatenate array features Xception+Resnet50
+        features = np.hstack((features_Xc,features_Rn))
+    
     else: 
         model, preprocessing_function, image_size = create_model(model_type)
         features = extract_features(df, model, preprocessing_function, image_size)
@@ -448,26 +520,26 @@ def classification(train_data, train_label, test_data, model_classifier):
   
 
 #----------------------- Main ------------------------------------------------
-model_type_list = ['Xception+ResNet50','VGG16+VGG19', 'Xception', 'VGG16', 'VGG19', 'ResNet50', 'ResNet101', 
-        'ResNet152','ResNet50V2', 'ResNet101V2', 'ResNet152V2', "InceptionV3",
-        'InceptionResNetV2', 'MobileNet', 'DenseNet121', 'DenseNet169',
-        'DenseNet201', 'NASNetMobile', 'MobileNetV2',
-        'EfficientNetB0', 'EfficientNetB1', 'EfficientNetB2', 
-        'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
-        'EfficientNetB6', 'EfficientNetB7']
+model_type_list = ['MobileNet+ResNet101','ResNet101+DenseNet169','ResNet101+DenseNet121','ResNet101+MobileNetV2',
+                   'EfficientNetB0+MobileNet','MobileNet+ResNet50','Xception+ResNet50','VGG16+VGG19', 'Xception', 
+                   'VGG16', 'VGG19', 'ResNet50', 'ResNet101', 'ResNet152','ResNet50V2', 'ResNet101V2', 'ResNet152V2',
+                   'InceptionV3', 'InceptionResNetV2', 'MobileNet', 'DenseNet121', 'DenseNet169',
+                   'DenseNet201', 'NASNetMobile', 'MobileNetV2',
+                   'EfficientNetB0', 'EfficientNetB1', 'EfficientNetB2', 
+                   'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
+                   'EfficientNetB6', 'EfficientNetB7']
 
-model_type_list = ['EfficientNetB0', 'EfficientNetB1']
+model_type_list = ['MobileNet+ResNet101','ResNet101+DenseNet169','ResNet101+DenseNet121',
+                   'ResNet101+MobileNetV2','EfficientNetB0+MobileNet','MobileNet+ResNet50']
 
-#model_type_list = ['EfficientNetB2', 'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5']
-
-#model_type_list = ['EfficientNetB7']
 
 model_reduction_dim_list = ['ReliefF'] #mRMR Minimum redundancy feature selection
-number_reduce_components=250
+number_reduce_components=300
 scaled_feat_reduction = 'No' # Yes or No
 
 #model_classifier_list = ['SMO']
 model_classifier_list = ['PCC', 'J48', 'RBF', 'LinearSVM','MLP','Logistic','RandomForest','Adaboost','Gaussian']
+model_classifier_list = ['PCC']
 
 #PCC parameters
 perc_samples = 0.1
@@ -704,24 +776,24 @@ for model_type in model_type_list:
                 #csv detailed data
                 print(" - Datailed statistics")
                 with open(data_filename,"a+") as f_data:
-                    f_data.write(model_type+", ") #CNN
-                    f_data.write(model_dimension_reduction+", ") #Reduction_alg
-                    f_data.write(model_classifier+", ") #Classifier
-                    f_data.write(str(index+1)+", ") #Kfold index
-                    f_data.write(str(np.shape(features)[1])+", " ) #CNN_features
-                    f_data.write(scaled_feat_reduction+", ") #Reduction_Scaled
-                    f_data.write(str(np.shape(dataset_train)[1])+", " ) #Reduction_Components
+                    f_data.write(model_type+",") #CNN
+                    f_data.write(model_dimension_reduction+",") #Reduction_alg
+                    f_data.write(model_classifier+",") #Classifier
+                    f_data.write(str(index+1)+",") #Kfold index
+                    f_data.write(str(np.shape(features)[1])+"," ) #CNN_features
+                    f_data.write(scaled_feat_reduction+",") #Reduction_Scaled
+                    f_data.write(str(np.shape(dataset_train)[1])+"," ) #Reduction_Components
                     if(model_classifier=="PCC"):
-                        f_data.write(str(n_knn_neighbors)+", ")  #k_neigh_PCC_classifier
+                        f_data.write(str(n_knn_neighbors)+",")  #k_neigh_PCC_classifier
                     else:
-                        f_data.write(str(0)+", ") 
-                    f_data.write(str("{0:.4f}".format(accuracy_score(hidden_labels,hidden_pred)*100))+", ") #Acc Score
-                    f_data.write(str("{0:.4f}".format(f1_score(hidden_labels,hidden_pred)*100))+", ") #F1 Score
-                    f_data.write(str("{0:.4f}".format(roc_auc_score(hidden_labels,hidden_pred)*100))+", ") #ROC Score
-                    f_data.write(str("{0:.4f}".format(time_feature_extration))+", ") #Time Extraction Features
-                    f_data.write(str("{0:.4f}".format(time_reduction))+", ") #Time Reduction dimensionality
-                    f_data.write(str("{0:.4f}".format(time_trainning))+", ") #Time Classifier Trainning
-                    f_data.write(str("{0:.4f}".format(time_prediction))+", \n") #Time Classifier Predict
+                        f_data.write(str(0)+",") 
+                    f_data.write(str("{0:.4f}".format(accuracy_score(hidden_labels,hidden_pred)*100))+",") #Acc Score
+                    f_data.write(str("{0:.4f}".format(f1_score(hidden_labels,hidden_pred)*100))+",") #F1 Score
+                    f_data.write(str("{0:.4f}".format(roc_auc_score(hidden_labels,hidden_pred)*100))+",") #ROC Score
+                    f_data.write(str("{0:.4f}".format(time_feature_extration))+",") #Time Extraction Features
+                    f_data.write(str("{0:.4f}".format(time_reduction))+",") #Time Reduction dimensionality
+                    f_data.write(str("{0:.4f}".format(time_trainning))+",") #Time Classifier Trainning
+                    f_data.write(str("{0:.4f}".format(time_prediction))+"\n") #Time Classifier Predict
                 
                 
                 #PRINT ACCURACY SCORE
@@ -783,40 +855,40 @@ for model_type in model_type_list:
              
             #log acc
             with open(data_acc_filename,"a+") as f_acc_csv:
-                f_acc_csv.write(model_type+", ") #CNN
-                f_acc_csv.write(model_dimension_reduction+", ") #Reduction_alg
-                f_acc_csv.write(scaled_feat_reduction+", ")
-                f_acc_csv.write(str(np.shape(dataset_train)[1])+", " ) #Reduction_Components
-                f_acc_csv.write(class_model+", ") #Classifier
+                f_acc_csv.write(model_type+",") #CNN
+                f_acc_csv.write(model_dimension_reduction+",") #Reduction_alg
+                f_acc_csv.write(scaled_feat_reduction+",")
+                f_acc_csv.write(str(np.shape(dataset_train)[1])+"," ) #Reduction_Components
+                f_acc_csv.write(class_model+",") #Classifier
                 for acc in acc_score:
-                    f_acc_csv.write("{0:.4f}".format(acc)+", ")
-                f_acc_csv.write("{0:.4f}".format(np.mean(acc_score))+", ") 
+                    f_acc_csv.write("{0:.4f}".format(acc)+",")
+                f_acc_csv.write("{0:.4f}".format(np.mean(acc_score))+",") 
                 f_acc_csv.write("{0:.4f}".format(np.std(acc_score)))
                 f_acc_csv.write("\n")
                         
             #log f1 score
             with open(data_f1_filename,"a+") as f_f1_csv:
-                f_f1_csv.write(model_type+", ") #CNN
-                f_f1_csv.write(model_dimension_reduction+", ") #Reduction_alg
-                f_f1_csv.write(scaled_feat_reduction+", ")
-                f_f1_csv.write(str(np.shape(dataset_train)[1])+", " ) #Reduction_Components
-                f_f1_csv.write(class_model+", ") #Classifier
+                f_f1_csv.write(model_type+",") #CNN
+                f_f1_csv.write(model_dimension_reduction+",") #Reduction_alg
+                f_f1_csv.write(scaled_feat_reduction+",")
+                f_f1_csv.write(str(np.shape(dataset_train)[1])+"," ) #Reduction_Components
+                f_f1_csv.write(class_model+",") #Classifier
                 for f1sc in f1c_score:
-                    f_f1_csv.write("{0:.4f}".format(f1sc)+", ")
-                f_f1_csv.write("{0:.4f}".format(np.mean(f1c_score))+", ") 
+                    f_f1_csv.write("{0:.4f}".format(f1sc)+",")
+                f_f1_csv.write("{0:.4f}".format(np.mean(f1c_score))+",") 
                 f_f1_csv.write("{0:.4f}".format(np.std(f1c_score)))    
                 f_f1_csv.write("\n")
                 
             #log roc score
             with open(data_roc_filename,"a+") as f_roc_csv:
-                f_roc_csv.write(model_type+", ") #CNN
-                f_roc_csv.write(model_dimension_reduction+", ") #Reduction_alg
-                f_roc_csv.write(scaled_feat_reduction+", ")
-                f_roc_csv.write(str(np.shape(dataset_train)[1])+", " ) #Reduction_Components
-                f_roc_csv.write(class_model+", ") #Classifier
+                f_roc_csv.write(model_type+",") #CNN
+                f_roc_csv.write(model_dimension_reduction+",") #Reduction_alg
+                f_roc_csv.write(scaled_feat_reduction+",")
+                f_roc_csv.write(str(np.shape(dataset_train)[1])+"," ) #Reduction_Components
+                f_roc_csv.write(class_model+",") #Classifier
                 for roc_sc in roc_score:
-                    f_roc_csv.write("{0:.4f}".format(roc_sc)+", ")
-                f_roc_csv.write("{0:.4f}".format(np.mean(roc_score))+", ") 
+                    f_roc_csv.write("{0:.4f}".format(roc_sc)+",")
+                f_roc_csv.write("{0:.4f}".format(np.mean(roc_score))+",") 
                 f_roc_csv.write("{0:.4f}".format(np.std(roc_score)))
                 f_roc_csv.write("\n")
 

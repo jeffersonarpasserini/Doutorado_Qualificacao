@@ -28,8 +28,6 @@ from sklearn import decomposition
 import umap
 #feature selection
 from ReliefF import ReliefF
-import pymrmre
-import pymrmr
 import mrmr
 #classifier's
 from pcc import ParticleCompetitionAndCooperation
@@ -316,6 +314,21 @@ def dimensinality_reduction(model_type_reduction, number_components, allfeatures
     
     return components, time_reduction
 
+
+def feature_selection_mRMR(X_train, X_train_label, y_test, method, number_features):
+    
+    X = pd.DataFrame(X_train)
+    y = pd.Series(X_train_label)
+       
+    selected_features = mrmr_regression(X=X, y=y, K=method)
+    #selected_features = mrmr.spark.mrmr_regression(df=X, target_column="target", K=2)
+    
+    pymrmr.mRMR(df, method, number_features)
+    
+    return x_train_features, y_test_features     
+
+    
+    
 def feature_selection(X_train, y_train, X_test, model_type_selection, number_components):
     
     start = time.time()
@@ -578,12 +591,13 @@ for model_type in model_type_list:
         
         #kfold loop
         for index, [train, test] in enumerate(kf.split(df)):
-                                                                                                                                                              
+            
             #gera dataset's 
             dataset_train, dataset_train_label, dataset_test, dataset_test_label = gen_dataset(allfeat, labels, train, test) 
             
             time_start = time.time()
-            dataset_train, dataset_test, time_reduction = feature_selection(dataset_train, dataset_train_label, dataset_test, model_dimension_reduction, number_reduce_components)
+            #feature selection mRMR and X/y dataset generated
+            dataset_train, dataset_test = feature_selection_mRMR(df, train, dataset_train, dataset_train_label, dataset_test, 'MIQ', 300)
             time_reduction = time.time()-time_start
             
             print("feature selection: "+model_dimension_reduction+" time --> "+"{0:.4f}".format(time_reduction) + " \n")
@@ -707,24 +721,24 @@ for model_type in model_type_list:
                 #csv detailed data
                 print(" - Datailed statistics")
                 with open(data_filename,"a+") as f_data:
-                    f_data.write(model_type+", ") #CNN
-                    f_data.write(model_dimension_reduction+", ") #Reduction_alg
-                    f_data.write(model_classifier+", ") #Classifier
-                    f_data.write(str(index+1)+", ") #Kfold index
-                    f_data.write(str(np.shape(features)[1])+", " ) #CNN_features
+                    f_data.write(model_type+",") #CNN
+                    f_data.write(model_dimension_reduction+",") #Reduction_alg
+                    f_data.write(model_classifier+",") #Classifier
+                    f_data.write(str(index+1)+",") #Kfold index
+                    f_data.write(str(np.shape(features)[1])+"," ) #CNN_features
                     f_data.write(scaled_feat_reduction+", ") #Reduction_Scaled
-                    f_data.write(str(np.shape(dataset_train)[1])+", " ) #Reduction_Components
+                    f_data.write(str(np.shape(dataset_train)[1])+"," ) #Reduction_Components
                     if(model_classifier=="PCC"):
-                        f_data.write(str(n_knn_neighbors)+", ")  #k_neigh_PCC_classifier
+                        f_data.write(str(n_knn_neighbors)+",")  #k_neigh_PCC_classifier
                     else:
                         f_data.write(str(0)+", ") 
-                    f_data.write(str("{0:.4f}".format(accuracy_score(hidden_labels,hidden_pred)*100))+", ") #Acc Score
-                    f_data.write(str("{0:.4f}".format(f1_score(hidden_labels,hidden_pred)*100))+", ") #F1 Score
-                    f_data.write(str("{0:.4f}".format(roc_auc_score(hidden_labels,hidden_pred)*100))+", ") #ROC Score
-                    f_data.write(str("{0:.4f}".format(time_feature_extration))+", ") #Time Extraction Features
-                    f_data.write(str("{0:.4f}".format(time_reduction))+", ") #Time Reduction dimensionality
-                    f_data.write(str("{0:.4f}".format(time_trainning))+", ") #Time Classifier Trainning
-                    f_data.write(str("{0:.4f}".format(time_prediction))+", \n") #Time Classifier Predict
+                    f_data.write(str("{0:.4f}".format(accuracy_score(hidden_labels,hidden_pred)*100))+",") #Acc Score
+                    f_data.write(str("{0:.4f}".format(f1_score(hidden_labels,hidden_pred)*100))+",") #F1 Score
+                    f_data.write(str("{0:.4f}".format(roc_auc_score(hidden_labels,hidden_pred)*100))+",") #ROC Score
+                    f_data.write(str("{0:.4f}".format(time_feature_extration))+",") #Time Extraction Features
+                    f_data.write(str("{0:.4f}".format(time_reduction))+",") #Time Reduction dimensionality
+                    f_data.write(str("{0:.4f}".format(time_trainning))+",") #Time Classifier Trainning
+                    f_data.write(str("{0:.4f}".format(time_prediction))+",\n") #Time Classifier Predict
                 
                 
                 #PRINT ACCURACY SCORE
@@ -786,40 +800,40 @@ for model_type in model_type_list:
              
             #log acc
             with open(data_acc_filename,"a+") as f_acc_csv:
-                f_acc_csv.write(model_type+", ") #CNN
-                f_acc_csv.write(model_dimension_reduction+", ") #Reduction_alg
-                f_acc_csv.write(scaled_feat_reduction+", ")
-                f_acc_csv.write(str(np.shape(dataset_train)[1])+", " ) #Reduction_Components
-                f_acc_csv.write(class_model+", ") #Classifier
+                f_acc_csv.write(model_type+",") #CNN
+                f_acc_csv.write(model_dimension_reduction+",") #Reduction_alg
+                f_acc_csv.write(scaled_feat_reduction+",")
+                f_acc_csv.write(str(np.shape(dataset_train)[1])+"," ) #Reduction_Components
+                f_acc_csv.write(class_model+",") #Classifier
                 for acc in acc_score:
-                    f_acc_csv.write("{0:.4f}".format(acc)+", ")
-                f_acc_csv.write("{0:.4f}".format(np.mean(acc_score))+", ") 
+                    f_acc_csv.write("{0:.4f}".format(acc)+",")
+                f_acc_csv.write("{0:.4f}".format(np.mean(acc_score))+",") 
                 f_acc_csv.write("{0:.4f}".format(np.std(acc_score)))
                 f_acc_csv.write("\n")
                         
             #log f1 score
             with open(data_f1_filename,"a+") as f_f1_csv:
-                f_f1_csv.write(model_type+", ") #CNN
-                f_f1_csv.write(model_dimension_reduction+", ") #Reduction_alg
-                f_f1_csv.write(scaled_feat_reduction+", ")
-                f_f1_csv.write(str(np.shape(dataset_train)[1])+", " ) #Reduction_Components
-                f_f1_csv.write(class_model+", ") #Classifier
+                f_f1_csv.write(model_type+",") #CNN
+                f_f1_csv.write(model_dimension_reduction+",") #Reduction_alg
+                f_f1_csv.write(scaled_feat_reduction+",")
+                f_f1_csv.write(str(np.shape(dataset_train)[1])+"," ) #Reduction_Components
+                f_f1_csv.write(class_model+",") #Classifier
                 for f1sc in f1c_score:
-                    f_f1_csv.write("{0:.4f}".format(f1sc)+", ")
-                f_f1_csv.write("{0:.4f}".format(np.mean(f1c_score))+", ") 
+                    f_f1_csv.write("{0:.4f}".format(f1sc)+",")
+                f_f1_csv.write("{0:.4f}".format(np.mean(f1c_score))+",") 
                 f_f1_csv.write("{0:.4f}".format(np.std(f1c_score)))    
                 f_f1_csv.write("\n")
                 
             #log roc score
             with open(data_roc_filename,"a+") as f_roc_csv:
-                f_roc_csv.write(model_type+", ") #CNN
-                f_roc_csv.write(model_dimension_reduction+", ") #Reduction_alg
-                f_roc_csv.write(scaled_feat_reduction+", ")
-                f_roc_csv.write(str(np.shape(dataset_train)[1])+", " ) #Reduction_Components
-                f_roc_csv.write(class_model+", ") #Classifier
+                f_roc_csv.write(model_type+",") #CNN
+                f_roc_csv.write(model_dimension_reduction+",") #Reduction_alg
+                f_roc_csv.write(scaled_feat_reduction+",")
+                f_roc_csv.write(str(np.shape(dataset_train)[1])+"," ) #Reduction_Components
+                f_roc_csv.write(class_model+",") #Classifier
                 for roc_sc in roc_score:
-                    f_roc_csv.write("{0:.4f}".format(roc_sc)+", ")
-                f_roc_csv.write("{0:.4f}".format(np.mean(roc_score))+", ") 
+                    f_roc_csv.write("{0:.4f}".format(roc_sc)+",")
+                f_roc_csv.write("{0:.4f}".format(np.mean(roc_score))+",") 
                 f_roc_csv.write("{0:.4f}".format(np.std(roc_score)))
                 f_roc_csv.write("\n")
 
