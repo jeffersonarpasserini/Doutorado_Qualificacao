@@ -271,7 +271,7 @@ def feature_model_extract(model_type):
         modelRn, preprocessing_functionRn, image_sizeRn = create_model(model_type)
         features_Rn = extract_features(df, modelRn, preprocessing_functionRn, image_sizeRn)
         
-        #concatenate array features Xception+Resnet50
+        #concatenate array features Xception+ResNet50
         features = np.hstack((features_Xc,features_Rn))
     
     elif model_type=='MobileNet+ResNet101':
@@ -283,7 +283,7 @@ def feature_model_extract(model_type):
         modelRn, preprocessing_functionRn, image_sizeRn = create_model(model_type)
         features_Rn = extract_features(df, modelRn, preprocessing_functionRn, image_sizeRn)
         
-        #concatenate array features Xception+Resnet50
+        #concatenate array features Xception+ResNet50
         features = np.hstack((features_Xc,features_Rn))
     
     elif model_type=='ResNet101+DenseNet169':
@@ -295,7 +295,7 @@ def feature_model_extract(model_type):
         modelRn, preprocessing_functionRn, image_sizeRn = create_model(model_type)
         features_Rn = extract_features(df, modelRn, preprocessing_functionRn, image_sizeRn)
         
-        #concatenate array features Xception+Resnet50
+        #concatenate array features Xception+ResNet50
         features = np.hstack((features_Xc,features_Rn))
 
     elif model_type=='ResNet101+DenseNet121':
@@ -307,7 +307,7 @@ def feature_model_extract(model_type):
         modelRn, preprocessing_functionRn, image_sizeRn = create_model(model_type)
         features_Rn = extract_features(df, modelRn, preprocessing_functionRn, image_sizeRn)
         
-        #concatenate array features Xception+Resnet50
+        #concatenate array features Xception+ResNet50
         features = np.hstack((features_Xc,features_Rn))
         
     elif model_type=='ResNet101+MobileNetV2':
@@ -319,7 +319,7 @@ def feature_model_extract(model_type):
         modelRn, preprocessing_functionRn, image_sizeRn = create_model(model_type)
         features_Rn = extract_features(df, modelRn, preprocessing_functionRn, image_sizeRn)
         
-        #concatenate array features Xception+Resnet50
+        #concatenate array features Xception+ResNet50
         features = np.hstack((features_Xc,features_Rn))
         
     elif model_type=='EfficientNetB0+MobileNet':
@@ -331,7 +331,7 @@ def feature_model_extract(model_type):
         modelRn, preprocessing_functionRn, image_sizeRn = create_model(model_type)
         features_Rn = extract_features(df, modelRn, preprocessing_functionRn, image_sizeRn)
         
-        #concatenate array features Xception+Resnet50
+        #concatenate array features Xception+ResNet50
         features = np.hstack((features_Xc,features_Rn))
     
     elif model_type=='MobileNet+ResNet50':
@@ -343,7 +343,7 @@ def feature_model_extract(model_type):
         modelRn, preprocessing_functionRn, image_sizeRn = create_model(model_type)
         features_Rn = extract_features(df, modelRn, preprocessing_functionRn, image_sizeRn)
         
-        #concatenate array features Xception+Resnet50
+        #concatenate array features Xception+ResNet50
         features = np.hstack((features_Xc,features_Rn))
     
     else: 
@@ -534,12 +534,12 @@ model_type_list = ['MobileNet+ResNet101','ResNet101+DenseNet169','ResNet101+Dens
 
 
 model_reduction_dim_list = ['ReliefF'] #mRMR Minimum redundancy feature selection
-number_reduce_components=300
+number_reduce_components=1
 scaled_feat_reduction = 'No' # Yes or No
 
 #model_classifier_list = ['SMO']
 model_classifier_list = ['PCC', 'J48', 'RBF', 'LinearSVM','MLP','Logistic','RandomForest','Adaboost','Gaussian']
-model_classifier_list = ['PCC']
+#model_classifier_list = ['J48', 'RBF', 'LinearSVM','MLP','Logistic','RandomForest','Adaboost','Gaussian']
 
 #PCC parameters
 perc_samples = 0.1
