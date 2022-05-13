@@ -456,15 +456,11 @@ model_type_list = ['Xception+ResNet50','VGG16+VGG19', 'Xception', 'VGG16', 'VGG1
         'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
         'EfficientNetB6', 'EfficientNetB7']
 
-model_type_list = [['MobileNet','Resnet101'],['ResNet101','DenseNet169'],['ResNet101','DenseNet121'],
+model_type_list = [['MobileNet','ResNet101'],['ResNet101','DenseNet169'],['ResNet101','DenseNet121'],
                    ['ResNet101','MobileNetV2'],['EfficientNetB0','MobileNet'],['MobileNet','ResNet50'],
                    ['Xception','ResNet50'],['VGG16','VGG19']]
 
-#model_type_list = ['EfficientNetB2', 'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5']
-
-#model_type_list = ['EfficientNetB7']
-
-model_reduction_dim_list = ['ReliefF'] #mRMR Minimum redundancy feature selection
+model_reduction_dim_list = ['ReliefF'] 
 number_reduce_components=150
 scaled_feat_reduction = 'No' # Yes or No
 
