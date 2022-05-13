@@ -448,20 +448,20 @@ def classification(train_data, train_label, test_data, model_classifier):
   
 
 #----------------------- Main ------------------------------------------------
-model_type_list = ['Xception+ResNet50','VGG16+VGG19', 'Xception', 'VGG16', 'VGG19', 'ResNet50', 'ResNet101', 
-        'ResNet152','ResNet50V2', 'ResNet101V2', 'ResNet152V2', "InceptionV3",
-        'InceptionResNetV2', 'MobileNet', 'DenseNet121', 'DenseNet169',
-        'DenseNet201', 'NASNetMobile', 'MobileNetV2',
-        'EfficientNetB0', 'EfficientNetB1', 'EfficientNetB2', 
-        'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
-        'EfficientNetB6', 'EfficientNetB7']
+#model_type_list = ['Xception+ResNet50','VGG16+VGG19', 'Xception', 'VGG16', 'VGG19', 'ResNet50', 'ResNet101', 
+#        'ResNet152','ResNet50V2', 'ResNet101V2', 'ResNet152V2', "InceptionV3",
+#        'InceptionResNetV2', 'MobileNet', 'DenseNet121', 'DenseNet169',
+#        'DenseNet201', 'NASNetMobile', 'MobileNetV2',
+#        'EfficientNetB0', 'EfficientNetB1', 'EfficientNetB2', 
+#        'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
+#        'EfficientNetB6', 'EfficientNetB7']
 
 model_type_list = [['MobileNet','ResNet101'],['ResNet101','DenseNet169'],['ResNet101','DenseNet121'],
                    ['ResNet101','MobileNetV2'],['EfficientNetB0','MobileNet'],['MobileNet','ResNet50'],
                    ['Xception','ResNet50'],['VGG16','VGG19']]
 
 model_reduction_dim_list = ['ReliefF'] 
-number_reduce_components=150
+number_reduce_components=20
 scaled_feat_reduction = 'No' # Yes or No
 
 #model_classifier_list = ['SMO']
@@ -469,7 +469,7 @@ model_classifier_list = ['PCC', 'J48', 'RBF', 'LinearSVM','MLP','Logistic','Rand
 
 #PCC parameters
 perc_samples = 0.1
-n_knn_neighbors = 24 
+n_knn_neighbors = 24
 v_p_grd = 0.5
 v_delta_v=0.1
 v_max_iter=1000000
