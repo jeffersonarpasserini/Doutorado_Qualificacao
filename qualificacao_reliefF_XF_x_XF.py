@@ -461,7 +461,7 @@ model_type_list = [['MobileNet','ResNet101'],['ResNet101','DenseNet169'],['ResNe
                    ['Xception','ResNet50'],['VGG16','VGG19']]
 
 model_reduction_dim_list = ['ReliefF'] 
-number_reduce_components=20
+number_reduce_components=1
 scaled_feat_reduction = 'No' # Yes or No
 
 #model_classifier_list = ['SMO']
