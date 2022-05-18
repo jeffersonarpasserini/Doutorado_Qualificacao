@@ -10,15 +10,19 @@ import pandas as pd
 RESULT_PATH = "/home/jeffersonpasserini/dados/ProjetosPos/Doutorado_Qualificacao/results/"
 
 df = pd.read_csv('results/data_daitaled.csv', 
-                names=['cnn','reduction','class','kfold','features','norm','components','pcc_knn','acc','f1','roc','extr_time','red_time','train_time','pred_time','column'], skiprows=1)
+                names=['cnn','reduction','class','kfold','features','norm','components','pcc_knn','acc','f1','roc','extr_time','red_time','train_time','pred_time'], skiprows=1)
 
-model_type_list = ['Xception+ResNet50','VGG16+VGG19', 'Xception', 'VGG16', 'VGG19', 'ResNet50', 'ResNet101', 
-        'ResNet152','ResNet50V2', 'ResNet101V2', 'ResNet152V2', "InceptionV3",
-        'InceptionResNetV2', 'MobileNet', 'DenseNet121', 'DenseNet169',
-        'DenseNet201', 'NASNetMobile', 'MobileNetV2',
-        'EfficientNetB0', 'EfficientNetB1', 'EfficientNetB2', 
-        'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
-        'EfficientNetB6', 'EfficientNetB7']
+model_type_list = ['MobileNet+ResNet101_n_feat','ResNet101+DenseNet169_n_feat','ResNet101+DenseNet121_n_feat','ResNet101+MobileNetV2_n_feat',
+                   'EfficientNetB0+MobileNet_n_feat','MobileNet+ResNet50_n_feat','Xception+ResNet50_n_feat','VGG16+VGG19_n_feat',
+                   'MobileNet+ResNet101','ResNet101+DenseNet169','ResNet101+DenseNet121','ResNet101+MobileNetV2',
+                   'EfficientNetB0+MobileNet','MobileNet+ResNet50','Xception+ResNet50','VGG16+VGG19', 'Xception', 
+                   'VGG16', 'VGG19', 'ResNet50', 'ResNet101', 'ResNet152','ResNet50V2', 'ResNet101V2', 'ResNet152V2',
+                   'InceptionV3', 'InceptionResNetV2', 'MobileNet', 'DenseNet121', 'DenseNet169',
+                   'DenseNet201', 'NASNetMobile', 'MobileNetV2',
+                   'EfficientNetB0', 'EfficientNetB1', 'EfficientNetB2', 
+                   'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
+                   'EfficientNetB6', 'EfficientNetB7']
+
 
 model_reduction_dim_list = ['PCA','UMAP','ReliefF']
 

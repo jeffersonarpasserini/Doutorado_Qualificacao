@@ -346,6 +346,18 @@ def feature_model_extract(model_type):
         #concatenate array features Xception+Resnet50
         features = np.hstack((features_Xc,features_Rn))
     
+    elif model_type=='EfficientNetB1+EfficientNetB5':
+        model_type = 'EfficientNetB1'
+        modelXc, preprocessing_functionXc, image_sizeXc = create_model(model_type)
+        features_Xc = extract_features(df, modelXc, preprocessing_functionXc, image_sizeXc)
+            
+        model_type = 'EfficientNetB5'
+        modelRn, preprocessing_functionRn, image_sizeRn = create_model(model_type)
+        features_Rn = extract_features(df, modelRn, preprocessing_functionRn, image_sizeRn)
+        
+        #concatenate array features EfficientNetB1+EfficientNetB5
+        features = np.hstack((features_Xc,features_Rn))
+    
     else: 
         model, preprocessing_function, image_size = create_model(model_type)
         features = extract_features(df, model, preprocessing_function, image_size)
@@ -529,13 +541,12 @@ model_type_list = ['MobileNet+ResNet101','ResNet101+DenseNet169','ResNet101+Dens
                    'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
                    'EfficientNetB6', 'EfficientNetB7']
 
-model_type_list = ['MobileNet+ResNet101','ResNet101+DenseNet169','ResNet101+DenseNet121',
-                   'ResNet101+MobileNetV2','EfficientNetB0+MobileNet','MobileNet+ResNet50']
+model_type_list = ['EfficientNetB1+EfficientNetB5']
 
 
 #model_reduction_dim_list = ['PCA', 'UMAP', 'ReliefF', 'mRMR','Full'] #mRMR Minimum redundancy feature selection
 model_reduction_dim_list = ['PCA', 'UMAP'] #mRMR Minimum redundancy feature selection
-#model_reduction_dim_list = ['Full']
+model_reduction_dim_list = ['Full']
 number_reduce_components=1
 scaled_feat_reduction = 'No' # Yes or No
 
@@ -671,7 +682,7 @@ for model_type in model_type_list:
                     f_data.write(str("{0:.4f}".format(time_feature_extration))+",") #Time Extraction Features
                     f_data.write(str("{0:.4f}".format(time_reduction))+",") #Time Reduction dimensionality
                     f_data.write(str("{0:.4f}".format(time_trainning))+",") #Time Classifier Trainning
-                    f_data.write(str("{0:.4f}".format(time_prediction))+", \n") #Time Classifier Predict
+                    f_data.write(str("{0:.4f}".format(time_prediction))+"\n") #Time Classifier Predict
                     
                 #PRINT ACCURACY SCORE
                 print("Comp:" + str(number_reduce_components) + " -knn:" + str(n_knn_neighbors) + " Exec:" + str(index) + " - Acc Score:" + "{0:.4f}".format(accuracy_score(hidden_labels,hidden_pred)) + " f1 Score:" + "{0:.4f}".format(f1_score(hidden_labels,hidden_pred)) + " ROC Score:" + "{0:.4f}".format(roc_auc_score(hidden_labels,hidden_pred)) + " Execution Time: " + "{0:.4f}".format(time_prediction+time_trainning) +'s')
