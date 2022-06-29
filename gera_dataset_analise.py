@@ -5,34 +5,44 @@ Created on Tue May  3 17:16:40 2022
 
 @author: jeffersonpasserini
 """
+import numpy as np
 import pandas as pd
 
 RESULT_PATH = "/home/jeffersonpasserini/dados/ProjetosPos/Doutorado_Qualificacao/results/"
 
-df = pd.read_csv('results/data_daitaled.csv', 
+df = pd.read_csv('results/data_detailed_alldata.csv', 
                 names=['cnn','reduction','class','kfold','features','norm','components','pcc_knn','acc','f1','roc','extr_time','red_time','train_time','pred_time'], skiprows=1)
 
-model_type_list = ['MobileNet+ResNet101_n_feat','ResNet101+DenseNet169_n_feat','ResNet101+DenseNet121_n_feat','ResNet101+MobileNetV2_n_feat',
-                   'EfficientNetB0+MobileNet_n_feat','MobileNet+ResNet50_n_feat','Xception+ResNet50_n_feat','VGG16+VGG19_n_feat',
-                   'MobileNet+ResNet101','ResNet101+DenseNet169','ResNet101+DenseNet121','ResNet101+MobileNetV2',
-                   'EfficientNetB0+MobileNet','MobileNet+ResNet50','Xception+ResNet50','VGG16+VGG19', 'Xception', 
-                   'VGG16', 'VGG19', 'ResNet50', 'ResNet101', 'ResNet152','ResNet50V2', 'ResNet101V2', 'ResNet152V2',
-                   'InceptionV3', 'InceptionResNetV2', 'MobileNet', 'DenseNet121', 'DenseNet169',
-                   'DenseNet201', 'NASNetMobile', 'MobileNetV2',
-                   'EfficientNetB0', 'EfficientNetB1', 'EfficientNetB2', 
-                   'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
-                   'EfficientNetB6', 'EfficientNetB7']
+method = 'method01'
+method01 = ['Xception','VGG16', 'VGG19', 'ResNet50', 'ResNet101', 'ResNet152','ResNet50V2', 'ResNet101V2', 'ResNet152V2',
+            'InceptionV3', 'InceptionResNetV2', 'MobileNet', 'DenseNet121', 'DenseNet169','DenseNet201', 'NASNetMobile', 
+            'MobileNetV2', 'EfficientNetB0', 'EfficientNetB1', 'EfficientNetB2', 'EfficientNetB3', 'EfficientNetB4', 
+            'EfficientNetB5', 'EfficientNetB6', 'EfficientNetB7']
 
+method02 = ['EfficientNetB1+EfficientNetB5','MobileNet+ResNet101','ResNet101+DenseNet169','ResNet101+DenseNet121','ResNet101+MobileNetV2',
+            'EfficientNetB0+MobileNet','MobileNet+ResNet50','Xception+ResNet50','VGG16+VGG19']
+
+method03 = ['EfficientNetB1+EfficientNetB5_n_feat','MobileNet+ResNet101_n_feat','ResNet101+DenseNet169_n_feat','ResNet101+DenseNet121_n_feat',
+            'ResNet101+MobileNetV2_n_feat', 'EfficientNetB0+MobileNet_n_feat','MobileNet+ResNet50_n_feat',
+            'Xception+ResNet50_n_feat','VGG16+VGG19_n_feat']
+
+if (method=='method01'):
+    model_type_list = method01
+elif (method=='method02'):
+    model_type_list = method02
+elif (method=='method03'):
+    model_type_list = method03
+else:
+    model_type_list = np.hstack((method01,method02,method03))
 
 model_reduction_dim_list = ['PCA','UMAP','ReliefF']
 
 model_classifier_list = ['PCC', 'J48', 'RBF', 'LinearSVM','MLP','Logistic','RandomForest','Adaboost','Gaussian']
 
-
 metric_type = 'acc'
-distr_normal = 'yes'
+distr_normal = 'no'
 
-data_filename = RESULT_PATH+"method_components_"+metric_type+"_resume.csv"
+data_filename = RESULT_PATH+metric_type+"_components_resume_"+method+".csv"
 
 with open(data_filename,"a+") as f_data:
     f_data.write('method,')
@@ -40,7 +50,7 @@ with open(data_filename,"a+") as f_data:
     f_data.write('reduction,') 
     f_data.write('classifier,')
     f_data.write('features,')
-    f_data.write('F001,')
+    f_data.write('F002,')
     f_data.write('F010,')
     f_data.write('F020,')
     f_data.write('F030,')
@@ -63,6 +73,11 @@ with open(data_filename,"a+") as f_data:
     
 
 for extr_model in model_type_list:
+    
+    full_model = extr_model.replace('_n_feat','').strip()
+
+    print("--------- full model: ", full_model)
+
     for red_model in model_reduction_dim_list:
         
         
@@ -70,32 +85,53 @@ for extr_model in model_type_list:
             
             print("Feat Extr: "+extr_model+" red/selection: "+red_model+" classifier: "+class_model)
 
-            df_full = df.loc[(df['cnn']==extr_model) & (df['reduction']=='Full') & (df['class']==class_model)]
             df_f = df.loc[(df['cnn']==extr_model) & (df['reduction']==red_model) & (df['class']==class_model)]
             
+            if (method=='method03'):
+                df_full = df.loc[(df['cnn']==full_model) & (df['reduction']=='Full') & (df['class']==class_model)]
+            else:
+                df_full = df.loc[(df['cnn']==extr_model) & (df['reduction']=='Full') & (df['class']==class_model)]                
             
-            #componentes
-            F001 = df_f.loc[(df_f['components']==1)][metric_type].mean()
-            F010 = df_f.loc[(df_f['components']==10)][metric_type].mean()
-            F020 = df_f.loc[(df_f['components']==20)][metric_type].mean()
-            F030 = df_f.loc[(df_f['components']==30)][metric_type].mean()
-            F040 = df_f.loc[(df_f['components']==40)][metric_type].mean()
-            F050 = df_f.loc[(df_f['components']==50)][metric_type].mean()
-            F075 = df_f.loc[(df_f['components']==75)][metric_type].mean()
-            F100 = df_f.loc[(df_f['components']==100)][metric_type].mean()
-            F150 = df_f.loc[(df_f['components']==150)][metric_type].mean()
-            F200 = df_f.loc[(df_f['components']==200)][metric_type].mean()
-            F250 = df_f.loc[(df_f['components']==250)][metric_type].mean()
-            F300 = df_f.loc[(df_f['components']==300)][metric_type].mean()
-            Full = df_full['acc'].mean()
+            if (distr_normal=='yes'):
+                #componentes
+                F001 = df_f.loc[(df_f['components']==2)][metric_type].mean()
+                F010 = df_f.loc[(df_f['components']==10)][metric_type].mean()
+                F020 = df_f.loc[(df_f['components']==20)][metric_type].mean()
+                F030 = df_f.loc[(df_f['components']==30)][metric_type].mean()
+                F040 = df_f.loc[(df_f['components']==40)][metric_type].mean()
+                F050 = df_f.loc[(df_f['components']==50)][metric_type].mean()
+                F075 = df_f.loc[(df_f['components']==75)][metric_type].mean()
+                F100 = df_f.loc[(df_f['components']==100)][metric_type].mean()
+                F150 = df_f.loc[(df_f['components']==150)][metric_type].mean()
+                F200 = df_f.loc[(df_f['components']==200)][metric_type].mean()
+                F250 = df_f.loc[(df_f['components']==250)][metric_type].mean()
+                F300 = df_f.loc[(df_f['components']==300)][metric_type].mean()
+                Full = df_full['acc'].mean()
+            else:
+                #componentes
+                F001 = df_f.loc[(df_f['components']==2)][metric_type].median()
+                F010 = df_f.loc[(df_f['components']==10)][metric_type].median()
+                F020 = df_f.loc[(df_f['components']==20)][metric_type].median()
+                F030 = df_f.loc[(df_f['components']==30)][metric_type].median()
+                F040 = df_f.loc[(df_f['components']==40)][metric_type].median()
+                F050 = df_f.loc[(df_f['components']==50)][metric_type].median()
+                F075 = df_f.loc[(df_f['components']==75)][metric_type].median()
+                F100 = df_f.loc[(df_f['components']==100)][metric_type].median()
+                F150 = df_f.loc[(df_f['components']==150)][metric_type].median()
+                F200 = df_f.loc[(df_f['components']==200)][metric_type].median()
+                F250 = df_f.loc[(df_f['components']==250)][metric_type].median()
+                F300 = df_f.loc[(df_f['components']==300)][metric_type].median()
+                Full = df_full['acc'].mean()
+
             
             #resultado_final
             #juntar dataframe full + dataframe do method redim atual.
             #para considerar na mean and median
             
-            df_concat = pd.concat((df_f,df_full))
-            
-            df_mean = df_concat.describe()
+            #df_concat = pd.concat((df_f,df_full))
+            #df_mean = df_concat.describe()
+
+            df_mean = df_f.describe()
             method_mean = df_mean.loc['mean'][metric_type]
             method_mean_std  = df_mean.loc['std'][metric_type]
             method_median = df_mean.loc['50%'][metric_type]

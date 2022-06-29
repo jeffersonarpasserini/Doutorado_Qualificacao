@@ -456,12 +456,15 @@ def classification(train_data, train_label, test_data, model_classifier):
 #        'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
 #        'EfficientNetB6', 'EfficientNetB7']
 
-model_type_list = [['MobileNet','ResNet101'],['ResNet101','DenseNet169'],['ResNet101','DenseNet121'],
-                   ['ResNet101','MobileNetV2'],['EfficientNetB0','MobileNet'],['MobileNet','ResNet50'],
-                   ['Xception','ResNet50'],['VGG16','VGG19']]
+model_type_list = [['EfficientNetB1','EfficientNetB5'],['MobileNet','ResNet101'],['ResNet101','DenseNet169'],
+                   ['ResNet101','DenseNet121'],['ResNet101','MobileNetV2'],['EfficientNetB0','MobileNet'],
+                   ['MobileNet','ResNet50'],['Xception','ResNet50'],['VGG16','VGG19']]
+
+#model_type_list = [['EfficientNetB1','EfficientNetB5']]
 
 model_reduction_dim_list = ['ReliefF'] 
-number_reduce_components=1
+number_reduce_components_list = [175,200,225,250,275,300,350,400,450,500]
+#number_reduce_components_list = [150,125,100,75,50,25,20,15,10,5,1]
 scaled_feat_reduction = 'No' # Yes or No
 
 #model_classifier_list = ['SMO']
@@ -493,369 +496,371 @@ kfold_n_repeats = 1
 kf = RepeatedKFold(n_splits=kfold_n_splits, n_repeats=kfold_n_repeats, random_state=SEED)
 kf.split(df)
 
+for number_reduce_components in number_reduce_components_list:
+    print('----------- Number Components : '+str(number_reduce_components))
 
-#CNN loop
-for model_type in model_type_list:
-    
-    
-    #model 01
-    
-    features_model01, time_feature_extration01 = feature_model_extract(model_type[0])
-    print('Extract features '+model_type[0]+' time feature extraction --> '+"{0:.4f}".format(time_feature_extration01) + " \n")
-    
-    number_features = np.shape(features_model01)[1]
-    
-    #model 02
-    features_model02, time_feature_extration02 = feature_model_extract(model_type[1])
-    print('Extract features '+model_type[1]+' time feature extraction --> '+"{0:.4f}".format(time_feature_extration02) + " \n")
-    
-    number_features = number_features+np.shape(features_model02)[1]
-    
-    time_feature_extration = time_feature_extration01+time_feature_extration02
-    
-    model_name = model_type[0]+"+"+model_type[1]
-    print('Extract features '+model_name+' time feature extraction --> '+"{0:.4f}".format(time_feature_extration) + " \n")
-    
+    #CNN loop
+    for model_type in model_type_list:
+        
+        
+        #model 01
+        
+        features_model01, time_feature_extration01 = feature_model_extract(model_type[0])
+        print('Extract features '+model_type[0]+' time feature extraction --> '+"{0:.4f}".format(time_feature_extration01) + " \n")
+        
+        number_features = np.shape(features_model01)[1]
+        
+        #model 02
+        features_model02, time_feature_extration02 = feature_model_extract(model_type[1])
+        print('Extract features '+model_type[1]+' time feature extraction --> '+"{0:.4f}".format(time_feature_extration02) + " \n")
+        
+        number_features = number_features+np.shape(features_model02)[1]
+        
+        time_feature_extration = time_feature_extration01+time_feature_extration02
+        
+        model_name = model_type[0]+"+"+model_type[1]
+        print('Extract features '+model_name+' time feature extraction --> '+"{0:.4f}".format(time_feature_extration) + " \n")
+        
 
-    #reduction loop
-    for model_dimension_reduction in model_reduction_dim_list:
-        
-        #allfeat = features.copy()
-        time_reduction = 0
-        
-        #log array's
-        PCC_acc_score = []
-        PCC_roc_score = []
-        PCC_f1c_score = []
-        PCC_data_time_reduction = []
-        PCC_data_time_trainning = []
-        PCC_data_time_prediction = []
-        
-        J48_acc_score = []
-        J48_roc_score = []
-        J48_f1c_score = []
-        J48_data_time_reduction = []
-        J48_data_time_trainning = []
-        J48_data_time_prediction = []
-        
-        RBF_acc_score = []
-        RBF_roc_score = []
-        RBF_f1c_score = []
-        RBF_data_time_reduction = []
-        RBF_data_time_trainning = []
-        RBF_data_time_prediction = []
-        
-        LINEAR_acc_score = []
-        LINEAR_roc_score = []
-        LINEAR_f1c_score = []
-        LINEAR_data_time_reduction = []
-        LINEAR_data_time_trainning = []
-        LINEAR_data_time_prediction = []
-        
-        MLP_acc_score = []
-        MLP_roc_score = []
-        MLP_f1c_score = []
-        MLP_data_time_reduction = []
-        MLP_data_time_trainning = []
-        MLP_data_time_prediction = []
-        
-        LOG_acc_score = []
-        LOG_roc_score = []
-        LOG_f1c_score = []
-        LOG_data_time_reduction = []
-        LOG_data_time_trainning = []
-        LOG_data_time_prediction = []
-             
-        FOREST_acc_score = []
-        FOREST_roc_score = []
-        FOREST_f1c_score = []
-        FOREST_data_time_reduction = []
-        FOREST_data_time_trainning = []
-        FOREST_data_time_prediction = []
-        
-        ADA_acc_score = []
-        ADA_roc_score = []
-        ADA_f1c_score = []
-        ADA_data_time_reduction = []
-        ADA_data_time_trainning = []
-        ADA_data_time_prediction = []
-        
-        GAU_acc_score = []
-        GAU_roc_score = []
-        GAU_f1c_score = []
-        GAU_data_time_reduction = []
-        GAU_data_time_trainning = []
-        GAU_data_time_prediction = []
-        
-        
-        #kfold loop
-        for index, [train, test] in enumerate(kf.split(df)):
-                                                                                                                                                              
-            #gera dataset's 
-            #model 01
-            dataset_train_md01, dataset_train_label_md01, dataset_test_md01, dataset_test_label_md01 = gen_dataset(features_model01, labels, train, test) 
+        #reduction loop
+        for model_dimension_reduction in model_reduction_dim_list:
             
-            #model 02
-            dataset_train_md02, dataset_train_label_md02, dataset_test_md02, dataset_test_label_md02 = gen_dataset(features_model02, labels, train, test) 
-            dataset_train_label = dataset_train_label_md01
-            dataset_test_label = dataset_test_label_md01
+            #allfeat = features.copy()
+            time_reduction = 0
             
-            time_start = time.time()
+            #log array's
+            PCC_acc_score = []
+            PCC_roc_score = []
+            PCC_f1c_score = []
+            PCC_data_time_reduction = []
+            PCC_data_time_trainning = []
+            PCC_data_time_prediction = []
             
-            #n better components for model 01
-            print('Extract features '+model_type[0]+"_"+model_dimension_reduction+"_"+str(number_reduce_components)+'f')
-            dataset_train_md01, dataset_test_md01, time_reduction_md01 = feature_selection(dataset_train_md01, dataset_train_label_md01, dataset_test_md01, model_dimension_reduction, number_reduce_components)
+            J48_acc_score = []
+            J48_roc_score = []
+            J48_f1c_score = []
+            J48_data_time_reduction = []
+            J48_data_time_trainning = []
+            J48_data_time_prediction = []
             
-            #n better components for model 02
-            print('Extract features '+model_type[1]+"_"+model_dimension_reduction+"_"+str(number_reduce_components)+'f')
-            dataset_train_md02, dataset_test_md02, time_reduction_md02 = feature_selection(dataset_train_md02, dataset_train_label_md02, dataset_test_md02, model_dimension_reduction, number_reduce_components)
+            RBF_acc_score = []
+            RBF_roc_score = []
+            RBF_f1c_score = []
+            RBF_data_time_reduction = []
+            RBF_data_time_trainning = []
+            RBF_data_time_prediction = []
             
-            #concat n features each model
-            dataset_train = np.hstack((dataset_train_md01,dataset_train_md02))
-            dataset_test = np.hstack((dataset_test_md01,dataset_test_md02))
+            LINEAR_acc_score = []
+            LINEAR_roc_score = []
+            LINEAR_f1c_score = []
+            LINEAR_data_time_reduction = []
+            LINEAR_data_time_trainning = []
+            LINEAR_data_time_prediction = []
             
+            MLP_acc_score = []
+            MLP_roc_score = []
+            MLP_f1c_score = []
+            MLP_data_time_reduction = []
+            MLP_data_time_trainning = []
+            MLP_data_time_prediction = []
             
-            
-            time_reduction = time.time()-time_start
-            
-            print("feature selection: "+model_dimension_reduction+" time --> "+"{0:.4f}".format(time_reduction) + " \n")
-            
-            model_name = model_type[0]+"_"+str(number_reduce_components)+"f+"+model_type[1]+"_"+str(number_reduce_components)+"f"
-            
-            #classifier loop
-            for model_classifier in model_classifier_list:
-        
-                if(model_classifier == 'PCC'):
-                    dataset_train_PCC = np.vstack((dataset_train,dataset_test))
-                    
-                    #mask labels dataset test
-                    mklabels = dataset_test_label.copy()
-                    for x in range(len(mklabels)):
-                        mklabels[x] = -1
-                                               
-                    #remount masked_labels                            
-                    masked_labels = np.hstack((dataset_train_label,mklabels))                        
+            LOG_acc_score = []
+            LOG_roc_score = []
+            LOG_f1c_score = []
+            LOG_data_time_reduction = []
+            LOG_data_time_trainning = []
+            LOG_data_time_prediction = []
                 
-                    #run classifier
-                    time_trainning, time_prediction, pred = classification_pcc(dataset_train_PCC,masked_labels,n_knn_neighbors)
-                    #calc acc results
-                    hidden_labels = dataset_test_label.copy()
-                    hidden_pred = pred[masked_labels == -1]
-                else:
-                    time_trainning, time_prediction, pred = classification(dataset_train, dataset_train_label, dataset_test, model_classifier)
-                    hidden_labels = dataset_test_label.copy()
-                    hidden_pred = pred.copy()
+            FOREST_acc_score = []
+            FOREST_roc_score = []
+            FOREST_f1c_score = []
+            FOREST_data_time_reduction = []
+            FOREST_data_time_trainning = []
+            FOREST_data_time_prediction = []
+            
+            ADA_acc_score = []
+            ADA_roc_score = []
+            ADA_f1c_score = []
+            ADA_data_time_reduction = []
+            ADA_data_time_trainning = []
+            ADA_data_time_prediction = []
+            
+            GAU_acc_score = []
+            GAU_roc_score = []
+            GAU_f1c_score = []
+            GAU_data_time_reduction = []
+            GAU_data_time_trainning = []
+            GAU_data_time_prediction = []
+            
+            
+            #kfold loop
+            for index, [train, test] in enumerate(kf.split(df)):
+                                                                                                                                                                
+                #gera dataset's 
+                #model 01
+                dataset_train_md01, dataset_train_label_md01, dataset_test_md01, dataset_test_label_md01 = gen_dataset(features_model01, labels, train, test) 
                 
-                print(model_name + " >> " + model_dimension_reduction + " >> " + model_classifier + ': Kfold: '+str(index+1) + ' - Trainning --> '+"{0:.4f}".format(time_trainning) + ' - Prediction --> '+"{0:.4f}".format(time_prediction)+"\n")
-                             
-                if (model_classifier == 'PCC'):
-                    print("PCC statistics")
-                    #score's log
-                    PCC_data_time_prediction.append(time_prediction)
-                    PCC_data_time_trainning.append(time_trainning)
-                    PCC_data_time_reduction.append(time_reduction)
-                    PCC_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
-                    PCC_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
-                    PCC_f1c_score.append(f1_score(hidden_labels,hidden_pred))
+                #model 02
+                dataset_train_md02, dataset_train_label_md02, dataset_test_md02, dataset_test_label_md02 = gen_dataset(features_model02, labels, train, test) 
+                dataset_train_label = dataset_train_label_md01
+                dataset_test_label = dataset_test_label_md01
                 
-                elif (model_classifier == 'J48'):
-                    print("J48 statistics")
-                    #score's log
-                    J48_data_time_prediction.append(time_prediction)
-                    J48_data_time_trainning.append(time_trainning)
-                    J48_data_time_reduction.append(time_reduction)
-                    J48_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
-                    J48_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
-                    J48_f1c_score.append(f1_score(hidden_labels,hidden_pred))
-                    
-                elif (model_classifier == 'RBF'):
-                    print("RBF statistics")
-                    #score's log
-                    RBF_data_time_prediction.append(time_prediction)
-                    RBF_data_time_trainning.append(time_trainning)
-                    RBF_data_time_reduction.append(time_reduction)
-                    RBF_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
-                    RBF_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
-                    RBF_f1c_score.append(f1_score(hidden_labels,hidden_pred))
+                time_start = time.time()
                 
-                elif (model_classifier == 'LinearSVM'):
-                    print("LinearSVM statistics")
-                    #score's log
-                    LINEAR_data_time_prediction.append(time_prediction)
-                    LINEAR_data_time_trainning.append(time_trainning)
-                    LINEAR_data_time_reduction.append(time_reduction)
-                    LINEAR_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
-                    LINEAR_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
-                    LINEAR_f1c_score.append(f1_score(hidden_labels,hidden_pred))
+                #n better components for model 01
+                print('Extract features '+model_type[0]+"_"+model_dimension_reduction+"_"+str(number_reduce_components)+'f')
+                dataset_train_md01, dataset_test_md01, time_reduction_md01 = feature_selection(dataset_train_md01, dataset_train_label_md01, dataset_test_md01, model_dimension_reduction, number_reduce_components)
                 
-                elif (model_classifier == 'MLP'):
-                    print("MLP statistics")
-                    #score's log
-                    MLP_data_time_prediction.append(time_prediction)
-                    MLP_data_time_trainning.append(time_trainning)
-                    MLP_data_time_reduction.append(time_reduction)
-                    MLP_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
-                    MLP_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
-                    MLP_f1c_score.append(f1_score(hidden_labels,hidden_pred))
+                #n better components for model 02
+                print('Extract features '+model_type[1]+"_"+model_dimension_reduction+"_"+str(number_reduce_components)+'f')
+                dataset_train_md02, dataset_test_md02, time_reduction_md02 = feature_selection(dataset_train_md02, dataset_train_label_md02, dataset_test_md02, model_dimension_reduction, number_reduce_components)
                 
-                elif (model_classifier == 'Logistic'):
-                    print("Logistic statistics")
-                    #score's log
-                    LOG_data_time_prediction.append(time_prediction)
-                    LOG_data_time_trainning.append(time_trainning)
-                    LOG_data_time_reduction.append(time_reduction)
-                    LOG_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
-                    LOG_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
-                    LOG_f1c_score.append(f1_score(hidden_labels,hidden_pred))
-                
-                elif (model_classifier == 'RandomForest'):
-                    print("Random Forest statistics")
-                    #score's log
-                    FOREST_data_time_prediction.append(time_prediction)
-                    FOREST_data_time_trainning.append(time_trainning)
-                    FOREST_data_time_reduction.append(time_reduction)
-                    FOREST_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
-                    FOREST_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
-                    FOREST_f1c_score.append(f1_score(hidden_labels,hidden_pred))
-                
-                elif (model_classifier == 'Adaboost'):
-                    print("Adaboost statistics")
-                    #score's log
-                    ADA_data_time_prediction.append(time_prediction)
-                    ADA_data_time_trainning.append(time_trainning)
-                    ADA_data_time_reduction.append(time_reduction)
-                    ADA_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
-                    ADA_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
-                    ADA_f1c_score.append(f1_score(hidden_labels,hidden_pred))
-                
-                elif (model_classifier == 'Gaussian'):
-                    print("Gaussian statistics")
-                    #score's log
-                    GAU_data_time_prediction.append(time_prediction)
-                    GAU_data_time_trainning.append(time_trainning)
-                    GAU_data_time_reduction.append(time_reduction)
-                    GAU_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
-                    GAU_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
-                    GAU_f1c_score.append(f1_score(hidden_labels,hidden_pred))
-                    
-                #csv detailed data
-                print(" - Datailed statistics")
-                with open(data_filename,"a+") as f_data:
-                    f_data.write(model_name+",") #CNN
-                    f_data.write(model_dimension_reduction+",") #Reduction_alg
-                    f_data.write(model_classifier+",") #Classifier
-                    f_data.write(str(index+1)+",") #Kfold index
-                    f_data.write(str(number_features)+"," ) #CNN_features
-                    f_data.write(scaled_feat_reduction+",") #Reduction_Scaled
-                    f_data.write(str(np.shape(dataset_train)[1])+"," ) #Reduction_Components
-                    if(model_classifier=="PCC"):
-                        f_data.write(str(n_knn_neighbors)+",")  #k_neigh_PCC_classifier
-                    else:
-                        f_data.write(str(0)+",") 
-                    f_data.write(str("{0:.4f}".format(accuracy_score(hidden_labels,hidden_pred)*100))+",") #Acc Score
-                    f_data.write(str("{0:.4f}".format(f1_score(hidden_labels,hidden_pred)*100))+",") #F1 Score
-                    f_data.write(str("{0:.4f}".format(roc_auc_score(hidden_labels,hidden_pred)*100))+",") #ROC Score
-                    f_data.write(str("{0:.4f}".format(time_feature_extration))+",") #Time Extraction Features
-                    f_data.write(str("{0:.4f}".format(time_reduction))+",") #Time Reduction dimensionality
-                    f_data.write(str("{0:.4f}".format(time_trainning))+",") #Time Classifier Trainning
-                    f_data.write(str("{0:.4f}".format(time_prediction))+"\n") #Time Classifier Predict
+                #concat n features each model
+                dataset_train = np.hstack((dataset_train_md01,dataset_train_md02))
+                dataset_test = np.hstack((dataset_test_md01,dataset_test_md02))
                 
                 
-                #PRINT ACCURACY SCORE
-                print("\n Comp:" + str(number_reduce_components) + " -knn:" + str(n_knn_neighbors) + " Exec:" + str(index) + " - Acc Score:" + "{0:.4f}".format(accuracy_score(hidden_labels,hidden_pred)) + " f1 Score:" + "{0:.4f}".format(f1_score(hidden_labels,hidden_pred)) + " ROC Score:" + "{0:.4f}".format(roc_auc_score(hidden_labels,hidden_pred)) + " Execution Time: " + "{0:.4f}".format(time_prediction+time_trainning) +'s')
-                print("-------------------------------------------------------------------------------------------------------")
-
-    
-
-        #save logs
-        for class_model in model_classifier_list:
+                
+                time_reduction = time.time()-time_start
+                
+                print("feature selection: "+model_dimension_reduction+" time --> "+"{0:.4f}".format(time_reduction) + " \n")
+                
+                model_name = model_type[0]+"_"+str(number_reduce_components)+"f+"+model_type[1]+"_"+str(number_reduce_components)+"f"
+                
+                #classifier loop
+                for model_classifier in model_classifier_list:
             
-            acc_score=[]
-            f1c_score=[]
-            roc_score=[]
-            if (class_model == 'PCC'):
-                acc_score = PCC_acc_score.copy()
-                f1c_score = PCC_f1c_score.copy()
-                roc_score = PCC_roc_score.copy()
-             
-            elif (class_model == 'J48'):
-                acc_score = J48_acc_score.copy()
-                f1c_score = J48_f1c_score.copy()
-                roc_score = J48_roc_score.copy()
-               
-            elif (class_model == 'RBF'):
-                acc_score = RBF_acc_score.copy()
-                f1c_score = RBF_f1c_score.copy()
-                roc_score = RBF_roc_score.copy()
-            
-            elif (class_model == 'LinearSVM'):
-                acc_score = LINEAR_acc_score.copy()
-                f1c_score = LINEAR_f1c_score.copy()
-                roc_score = LINEAR_roc_score.copy()
-            
-            elif (class_model == 'MLP'):
-                acc_score = MLP_acc_score.copy()
-                f1c_score = MLP_f1c_score.copy()
-                roc_score = MLP_roc_score.copy()
-               
-            elif (class_model == 'Logistic'):
-                acc_score = LOG_acc_score.copy()
-                f1c_score = LOG_f1c_score.copy()
-                roc_score = LOG_roc_score.copy()
-               
-            elif (class_model == 'RandomForest'):
-                acc_score = FOREST_acc_score.copy()
-                f1c_score = FOREST_f1c_score.copy()
-                roc_score = FOREST_roc_score.copy()
-               
-            elif (class_model == 'Adaboost'):
-                acc_score = ADA_acc_score.copy()
-                f1c_score = ADA_f1c_score.copy()
-                roc_score = ADA_roc_score.copy()
-              
-            elif (class_model == 'Gaussian'):
-                acc_score = GAU_acc_score.copy()
-                f1c_score = GAU_f1c_score.copy()
-                roc_score = GAU_roc_score.copy()
-             
-            #log acc
-            with open(data_acc_filename,"a+") as f_acc_csv:
-                f_acc_csv.write(model_name+",") #CNN
-                f_acc_csv.write(model_dimension_reduction+",") #Reduction_alg
-                f_acc_csv.write(scaled_feat_reduction+",")
-                f_acc_csv.write(str(np.shape(dataset_train)[1])+"," ) #Reduction_Components
-                f_acc_csv.write(class_model+",") #Classifier
-                for acc in acc_score:
-                    f_acc_csv.write("{0:.4f}".format(acc)+",")
-                f_acc_csv.write("{0:.4f}".format(np.mean(acc_score))+",") 
-                f_acc_csv.write("{0:.4f}".format(np.std(acc_score)))
-                f_acc_csv.write("\n")
+                    if(model_classifier == 'PCC'):
+                        dataset_train_PCC = np.vstack((dataset_train,dataset_test))
                         
-            #log f1 score
-            with open(data_f1_filename,"a+") as f_f1_csv:
-                f_f1_csv.write(model_name+",") #CNN
-                f_f1_csv.write(model_dimension_reduction+",") #Reduction_alg
-                f_f1_csv.write(scaled_feat_reduction+",")
-                f_f1_csv.write(str(np.shape(dataset_train)[1])+",") #Reduction_Components
-                f_f1_csv.write(class_model+",") #Classifier
-                for f1sc in f1c_score:
-                    f_f1_csv.write("{0:.4f}".format(f1sc)+",")
-                f_f1_csv.write("{0:.4f}".format(np.mean(f1c_score))+",") 
-                f_f1_csv.write("{0:.4f}".format(np.std(f1c_score)))    
-                f_f1_csv.write("\n")
+                        #mask labels dataset test
+                        mklabels = dataset_test_label.copy()
+                        for x in range(len(mklabels)):
+                            mklabels[x] = -1
+                                                
+                        #remount masked_labels                            
+                        masked_labels = np.hstack((dataset_train_label,mklabels))                        
+                    
+                        #run classifier
+                        time_trainning, time_prediction, pred = classification_pcc(dataset_train_PCC,masked_labels,n_knn_neighbors)
+                        #calc acc results
+                        hidden_labels = dataset_test_label.copy()
+                        hidden_pred = pred[masked_labels == -1]
+                    else:
+                        time_trainning, time_prediction, pred = classification(dataset_train, dataset_train_label, dataset_test, model_classifier)
+                        hidden_labels = dataset_test_label.copy()
+                        hidden_pred = pred.copy()
+                    
+                    print(model_name + " >> " + model_dimension_reduction + " >> " + model_classifier + ': Kfold: '+str(index+1) + ' - Trainning --> '+"{0:.4f}".format(time_trainning) + ' - Prediction --> '+"{0:.4f}".format(time_prediction)+"\n")
+                                
+                    if (model_classifier == 'PCC'):
+                        print("PCC statistics")
+                        #score's log
+                        PCC_data_time_prediction.append(time_prediction)
+                        PCC_data_time_trainning.append(time_trainning)
+                        PCC_data_time_reduction.append(time_reduction)
+                        PCC_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
+                        PCC_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
+                        PCC_f1c_score.append(f1_score(hidden_labels,hidden_pred))
+                    
+                    elif (model_classifier == 'J48'):
+                        print("J48 statistics")
+                        #score's log
+                        J48_data_time_prediction.append(time_prediction)
+                        J48_data_time_trainning.append(time_trainning)
+                        J48_data_time_reduction.append(time_reduction)
+                        J48_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
+                        J48_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
+                        J48_f1c_score.append(f1_score(hidden_labels,hidden_pred))
+                        
+                    elif (model_classifier == 'RBF'):
+                        print("RBF statistics")
+                        #score's log
+                        RBF_data_time_prediction.append(time_prediction)
+                        RBF_data_time_trainning.append(time_trainning)
+                        RBF_data_time_reduction.append(time_reduction)
+                        RBF_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
+                        RBF_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
+                        RBF_f1c_score.append(f1_score(hidden_labels,hidden_pred))
+                    
+                    elif (model_classifier == 'LinearSVM'):
+                        print("LinearSVM statistics")
+                        #score's log
+                        LINEAR_data_time_prediction.append(time_prediction)
+                        LINEAR_data_time_trainning.append(time_trainning)
+                        LINEAR_data_time_reduction.append(time_reduction)
+                        LINEAR_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
+                        LINEAR_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
+                        LINEAR_f1c_score.append(f1_score(hidden_labels,hidden_pred))
+                    
+                    elif (model_classifier == 'MLP'):
+                        print("MLP statistics")
+                        #score's log
+                        MLP_data_time_prediction.append(time_prediction)
+                        MLP_data_time_trainning.append(time_trainning)
+                        MLP_data_time_reduction.append(time_reduction)
+                        MLP_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
+                        MLP_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
+                        MLP_f1c_score.append(f1_score(hidden_labels,hidden_pred))
+                    
+                    elif (model_classifier == 'Logistic'):
+                        print("Logistic statistics")
+                        #score's log
+                        LOG_data_time_prediction.append(time_prediction)
+                        LOG_data_time_trainning.append(time_trainning)
+                        LOG_data_time_reduction.append(time_reduction)
+                        LOG_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
+                        LOG_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
+                        LOG_f1c_score.append(f1_score(hidden_labels,hidden_pred))
+                    
+                    elif (model_classifier == 'RandomForest'):
+                        print("Random Forest statistics")
+                        #score's log
+                        FOREST_data_time_prediction.append(time_prediction)
+                        FOREST_data_time_trainning.append(time_trainning)
+                        FOREST_data_time_reduction.append(time_reduction)
+                        FOREST_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
+                        FOREST_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
+                        FOREST_f1c_score.append(f1_score(hidden_labels,hidden_pred))
+                    
+                    elif (model_classifier == 'Adaboost'):
+                        print("Adaboost statistics")
+                        #score's log
+                        ADA_data_time_prediction.append(time_prediction)
+                        ADA_data_time_trainning.append(time_trainning)
+                        ADA_data_time_reduction.append(time_reduction)
+                        ADA_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
+                        ADA_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
+                        ADA_f1c_score.append(f1_score(hidden_labels,hidden_pred))
+                    
+                    elif (model_classifier == 'Gaussian'):
+                        print("Gaussian statistics")
+                        #score's log
+                        GAU_data_time_prediction.append(time_prediction)
+                        GAU_data_time_trainning.append(time_trainning)
+                        GAU_data_time_reduction.append(time_reduction)
+                        GAU_acc_score.append(accuracy_score(hidden_labels,hidden_pred))
+                        GAU_roc_score.append(roc_auc_score(hidden_labels,hidden_pred))
+                        GAU_f1c_score.append(f1_score(hidden_labels,hidden_pred))
+                        
+                    #csv detailed data
+                    print(" - Datailed statistics")
+                    with open(data_filename,"a+") as f_data:
+                        f_data.write(model_name+",") #CNN
+                        f_data.write(model_dimension_reduction+",") #Reduction_alg
+                        f_data.write(model_classifier+",") #Classifier
+                        f_data.write(str(index+1)+",") #Kfold index
+                        f_data.write(str(number_features)+"," ) #CNN_features
+                        f_data.write(scaled_feat_reduction+",") #Reduction_Scaled
+                        f_data.write(str(np.shape(dataset_train)[1])+"," ) #Reduction_Components
+                        if(model_classifier=="PCC"):
+                            f_data.write(str(n_knn_neighbors)+",")  #k_neigh_PCC_classifier
+                        else:
+                            f_data.write(str(0)+",") 
+                        f_data.write(str("{0:.4f}".format(accuracy_score(hidden_labels,hidden_pred)*100))+",") #Acc Score
+                        f_data.write(str("{0:.4f}".format(f1_score(hidden_labels,hidden_pred)*100))+",") #F1 Score
+                        f_data.write(str("{0:.4f}".format(roc_auc_score(hidden_labels,hidden_pred)*100))+",") #ROC Score
+                        f_data.write(str("{0:.4f}".format(time_feature_extration))+",") #Time Extraction Features
+                        f_data.write(str("{0:.4f}".format(time_reduction))+",") #Time Reduction dimensionality
+                        f_data.write(str("{0:.4f}".format(time_trainning))+",") #Time Classifier Trainning
+                        f_data.write(str("{0:.4f}".format(time_prediction))+"\n") #Time Classifier Predict
+                    
+                    
+                    #PRINT ACCURACY SCORE
+                    print("\n Comp:" + str(number_reduce_components) + " -knn:" + str(n_knn_neighbors) + " Exec:" + str(index) + " - Acc Score:" + "{0:.4f}".format(accuracy_score(hidden_labels,hidden_pred)) + " f1 Score:" + "{0:.4f}".format(f1_score(hidden_labels,hidden_pred)) + " ROC Score:" + "{0:.4f}".format(roc_auc_score(hidden_labels,hidden_pred)) + " Execution Time: " + "{0:.4f}".format(time_prediction+time_trainning) +'s')
+                    print("-------------------------------------------------------------------------------------------------------")
+
+        
+
+            #save logs
+            for class_model in model_classifier_list:
                 
-            #log roc score
-            with open(data_roc_filename,"a+") as f_roc_csv:
-                f_roc_csv.write(model_name+",") #CNN
-                f_roc_csv.write(model_dimension_reduction+",") #Reduction_alg
-                f_roc_csv.write(scaled_feat_reduction+",")
-                f_roc_csv.write(str(np.shape(dataset_train)[1])+"," ) #Reduction_Components
-                f_roc_csv.write(class_model+",") #Classifier
-                for roc_sc in roc_score:
-                    f_roc_csv.write("{0:.4f}".format(roc_sc)+",")
-                f_roc_csv.write("{0:.4f}".format(np.mean(roc_score))+",") 
-                f_roc_csv.write("{0:.4f}".format(np.std(roc_score)))
-                f_roc_csv.write("\n")
+                acc_score=[]
+                f1c_score=[]
+                roc_score=[]
+                if (class_model == 'PCC'):
+                    acc_score = PCC_acc_score.copy()
+                    f1c_score = PCC_f1c_score.copy()
+                    roc_score = PCC_roc_score.copy()
+                
+                elif (class_model == 'J48'):
+                    acc_score = J48_acc_score.copy()
+                    f1c_score = J48_f1c_score.copy()
+                    roc_score = J48_roc_score.copy()
+                
+                elif (class_model == 'RBF'):
+                    acc_score = RBF_acc_score.copy()
+                    f1c_score = RBF_f1c_score.copy()
+                    roc_score = RBF_roc_score.copy()
+                
+                elif (class_model == 'LinearSVM'):
+                    acc_score = LINEAR_acc_score.copy()
+                    f1c_score = LINEAR_f1c_score.copy()
+                    roc_score = LINEAR_roc_score.copy()
+                
+                elif (class_model == 'MLP'):
+                    acc_score = MLP_acc_score.copy()
+                    f1c_score = MLP_f1c_score.copy()
+                    roc_score = MLP_roc_score.copy()
+                
+                elif (class_model == 'Logistic'):
+                    acc_score = LOG_acc_score.copy()
+                    f1c_score = LOG_f1c_score.copy()
+                    roc_score = LOG_roc_score.copy()
+                
+                elif (class_model == 'RandomForest'):
+                    acc_score = FOREST_acc_score.copy()
+                    f1c_score = FOREST_f1c_score.copy()
+                    roc_score = FOREST_roc_score.copy()
+                
+                elif (class_model == 'Adaboost'):
+                    acc_score = ADA_acc_score.copy()
+                    f1c_score = ADA_f1c_score.copy()
+                    roc_score = ADA_roc_score.copy()
+                
+                elif (class_model == 'Gaussian'):
+                    acc_score = GAU_acc_score.copy()
+                    f1c_score = GAU_f1c_score.copy()
+                    roc_score = GAU_roc_score.copy()
+                
+                #log acc
+                with open(data_acc_filename,"a+") as f_acc_csv:
+                    f_acc_csv.write(model_name+",") #CNN
+                    f_acc_csv.write(model_dimension_reduction+",") #Reduction_alg
+                    f_acc_csv.write(scaled_feat_reduction+",")
+                    f_acc_csv.write(str(np.shape(dataset_train)[1])+"," ) #Reduction_Components
+                    f_acc_csv.write(class_model+",") #Classifier
+                    for acc in acc_score:
+                        f_acc_csv.write("{0:.4f}".format(acc)+",")
+                    f_acc_csv.write("{0:.4f}".format(np.mean(acc_score))+",") 
+                    f_acc_csv.write("{0:.4f}".format(np.std(acc_score)))
+                    f_acc_csv.write("\n")
+                            
+                #log f1 score
+                with open(data_f1_filename,"a+") as f_f1_csv:
+                    f_f1_csv.write(model_name+",") #CNN
+                    f_f1_csv.write(model_dimension_reduction+",") #Reduction_alg
+                    f_f1_csv.write(scaled_feat_reduction+",")
+                    f_f1_csv.write(str(np.shape(dataset_train)[1])+",") #Reduction_Components
+                    f_f1_csv.write(class_model+",") #Classifier
+                    for f1sc in f1c_score:
+                        f_f1_csv.write("{0:.4f}".format(f1sc)+",")
+                    f_f1_csv.write("{0:.4f}".format(np.mean(f1c_score))+",") 
+                    f_f1_csv.write("{0:.4f}".format(np.std(f1c_score)))    
+                    f_f1_csv.write("\n")
+                    
+                #log roc score
+                with open(data_roc_filename,"a+") as f_roc_csv:
+                    f_roc_csv.write(model_name+",") #CNN
+                    f_roc_csv.write(model_dimension_reduction+",") #Reduction_alg
+                    f_roc_csv.write(scaled_feat_reduction+",")
+                    f_roc_csv.write(str(np.shape(dataset_train)[1])+"," ) #Reduction_Components
+                    f_roc_csv.write(class_model+",") #Classifier
+                    for roc_sc in roc_score:
+                        f_roc_csv.write("{0:.4f}".format(roc_sc)+",")
+                    f_roc_csv.write("{0:.4f}".format(np.mean(roc_score))+",") 
+                    f_roc_csv.write("{0:.4f}".format(np.std(roc_score)))
+                    f_roc_csv.write("\n")
 
 
 

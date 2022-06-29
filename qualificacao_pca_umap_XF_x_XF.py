@@ -468,12 +468,15 @@ def classification(train_data, train_label, test_data, model_classifier):
 #        'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
 #        'EfficientNetB6', 'EfficientNetB7']
 
-model_type_list = [['MobileNet','ResNet101'],['ResNet101','DenseNet169'],['ResNet101','DenseNet121'],
-                   ['ResNet101','MobileNetV2'],['EfficientNetB0','MobileNet'],['MobileNet','ResNet50'],
-                   ['Xception','ResNet50'],['VGG16','VGG19']]
+model_type_list = [['EfficientNetB1','EfficientNetB5'],['MobileNet','ResNet101'],['ResNet101','DenseNet169'],
+                   ['ResNet101','DenseNet121'],['ResNet101','MobileNetV2'],['EfficientNetB0','MobileNet'],
+                   ['MobileNet','ResNet50'],['Xception','ResNet50'],['VGG16','VGG19']]
+
+model_type_list = [['EfficientNetB1','EfficientNetB5']]
 
 model_reduction_dim_list = ['PCA','UMAP'] 
 number_reduce_components_list = [37]
+#number_reduce_components_list = [150,125,100,75,50,25,20,15,10,5,1]
 scaled_feat_reduction = 'No' # Yes or No
 
 #model_classifier_list = ['SMO']
@@ -540,7 +543,7 @@ for number_reduce_components in number_reduce_components_list:
 
             #n better components for model 02
             print('Reduce/Selection features '+model_type[1]+"_"+model_dimension_reduction+"_"+str(number_reduce_components)+'f')
-            features_model02_red, time_reduction_model02 = dimensinality_reduction(model_dimension_reduction, number_reduce_components,features_model02,scaled_feat_reduction)
+            features_model02_red, time_reduction_model02 = dimensinality_reduction(model_dimension_reduction, number_reduce_components+1,features_model02,scaled_feat_reduction)
                             
             #allfeat = features.copy()
             time_reduction = time_reduction_model01+time_reduction_model02

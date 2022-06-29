@@ -532,7 +532,8 @@ def classification(train_data, train_label, test_data, model_classifier):
     
 
 #----------------------- Main ------------------------------------------------
-model_type_list = ['MobileNet+ResNet101','ResNet101+DenseNet169','ResNet101+DenseNet121','ResNet101+MobileNetV2',
+#gera dados metodo 01 e metodo 02 e Full (PCA e UMAP)
+model_type_list = ['EfficientNetB1+EfficientNetB5','MobileNet+ResNet101','ResNet101+DenseNet169','ResNet101+DenseNet121','ResNet101+MobileNetV2',
                    'EfficientNetB0+MobileNet','MobileNet+ResNet50','Xception+ResNet50','VGG16+VGG19', 'Xception', 
                    'VGG16', 'VGG19', 'ResNet50', 'ResNet101', 'ResNet152','ResNet50V2', 'ResNet101V2', 'ResNet152V2',
                    'InceptionV3', 'InceptionResNetV2', 'MobileNet', 'DenseNet121', 'DenseNet169',
@@ -541,13 +542,14 @@ model_type_list = ['MobileNet+ResNet101','ResNet101+DenseNet169','ResNet101+Dens
                    'EfficientNetB3', 'EfficientNetB4', 'EfficientNetB5',
                    'EfficientNetB6', 'EfficientNetB7']
 
-model_type_list = ['EfficientNetB1+EfficientNetB5']
+model_type_list = ['VGG16']
 
 
 #model_reduction_dim_list = ['PCA', 'UMAP', 'ReliefF', 'mRMR','Full'] #mRMR Minimum redundancy feature selection
 model_reduction_dim_list = ['PCA', 'UMAP'] #mRMR Minimum redundancy feature selection
-model_reduction_dim_list = ['Full']
-number_reduce_components=1
+#model_reduction_dim_list = ['Full']
+components_number_list = [2,10,20,30,40,50,75,100,150,200,250,300,350,400,450,500,550,600,700,800,900,1000]
+number_reduce_components=342
 scaled_feat_reduction = 'No' # Yes or No
 
 #model_classifier_list = ['SMO']
