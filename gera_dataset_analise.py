@@ -13,7 +13,7 @@ RESULT_PATH = "/home/jeffersonpasserini/dados/ProjetosPos/Doutorado_Qualificacao
 df = pd.read_csv('results/data_detailed_alldata.csv', 
                 names=['cnn','reduction','class','kfold','features','norm','components','pcc_knn','acc','f1','roc','extr_time','red_time','train_time','pred_time'], skiprows=1)
 
-method = 'method01'
+method = ''
 method01 = ['Xception','VGG16', 'VGG19', 'ResNet50', 'ResNet101', 'ResNet152','ResNet50V2', 'ResNet101V2', 'ResNet152V2',
             'InceptionV3', 'InceptionResNetV2', 'MobileNet', 'DenseNet121', 'DenseNet169','DenseNet201', 'NASNetMobile', 
             'MobileNetV2', 'EfficientNetB0', 'EfficientNetB1', 'EfficientNetB2', 'EfficientNetB3', 'EfficientNetB4', 
@@ -94,7 +94,7 @@ for extr_model in model_type_list:
             
             if (distr_normal=='yes'):
                 #componentes
-                F001 = df_f.loc[(df_f['components']==2)][metric_type].mean()
+                F002 = df_f.loc[(df_f['components']==2)][metric_type].mean()
                 F010 = df_f.loc[(df_f['components']==10)][metric_type].mean()
                 F020 = df_f.loc[(df_f['components']==20)][metric_type].mean()
                 F030 = df_f.loc[(df_f['components']==30)][metric_type].mean()
@@ -109,7 +109,7 @@ for extr_model in model_type_list:
                 Full = df_full['acc'].mean()
             else:
                 #componentes
-                F001 = df_f.loc[(df_f['components']==2)][metric_type].median()
+                F002 = df_f.loc[(df_f['components']==2)][metric_type].median()
                 F010 = df_f.loc[(df_f['components']==10)][metric_type].median()
                 F020 = df_f.loc[(df_f['components']==20)][metric_type].median()
                 F030 = df_f.loc[(df_f['components']==30)][metric_type].median()
@@ -147,7 +147,7 @@ for extr_model in model_type_list:
                 f_data.write(red_model+",") #Reduction_alg
                 f_data.write(class_model+",") #Classifier
                 f_data.write(str("{}".format(df_f['features'].mean()))+",") #number features extracted
-                f_data.write(str("{0:.4f}".format(F001))+",") #1 component
+                f_data.write(str("{0:.4f}".format(F002))+",") #1 component
                 f_data.write(str("{0:.4f}".format(F010))+",") #10 components
                 f_data.write(str("{0:.4f}".format(F020))+",") #20 components
                 f_data.write(str("{0:.4f}".format(F030))+",") #30 components

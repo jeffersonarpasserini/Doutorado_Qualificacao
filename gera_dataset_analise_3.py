@@ -5,6 +5,10 @@ Created on Tue May  3 17:16:40 2022
 
 @author: jeffersonpasserini
 """
+
+#gera arquivo de analise por método de extração de dados e red/sel. features.
+
+
 from cmath import nan
 import numpy as np
 import pandas as pd
