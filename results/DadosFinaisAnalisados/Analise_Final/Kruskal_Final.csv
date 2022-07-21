@@ -1,0 +1,51 @@
+﻿Metodo;Fold;ACC
+Abordagem04;1;0,914286
+Abordagem04;2;0,971429
+Abordagem04;3;0,911765
+Abordagem04;4;0,852941
+Abordagem04;5;0,941176
+Abordagem04;6;0,970588
+Abordagem04;7;0,911765
+Abordagem04;8;0,970588
+Abordagem04;9;0,882353
+Abordagem04;10;1
+Abordagem03;1;0,971429
+Abordagem03;2;0,971429
+Abordagem03;3;0,941176
+Abordagem03;4;0,911765
+Abordagem03;5;0,911765
+Abordagem03;6;0,941176
+Abordagem03;7;0,970588
+Abordagem03;8;1
+Abordagem03;9;0,941176
+Abordagem03;10;1
+Abordagem02;1;0,9429
+Abordagem02;2;0,9429
+Abordagem02;3;0,9412
+Abordagem02;4;0,8529
+Abordagem02;5;0,9118
+Abordagem02;6;0,9706
+Abordagem02;7;0,9118
+Abordagem02;8;0,9706
+Abordagem02;9;0,9412
+Abordagem02;10;1
+Abordagem01;1;0,8857
+Abordagem01;2;0,9429
+Abordagem01;3;0,9412
+Abordagem01;4;0,8824
+Abordagem01;5;0,9118
+Abordagem01;6;0,9706
+Abordagem01;7;0,9118
+Abordagem01;8;1
+Abordagem01;9;0,9412
+Abordagem01;10;0,9706
+DenseNet201      ;1;0,9429
+DenseNet201      ;2;0,9714
+DenseNet201      ;3;0,9412
+DenseNet201      ;4;0,9412
+DenseNet201      ;5;0,9412
+DenseNet201      ;6;0,9118
+DenseNet201      ;7;0,9118
+DenseNet201      ;8;0,8824
+DenseNet201      ;9;0,9412
+DenseNet201      ;10;0,9412
