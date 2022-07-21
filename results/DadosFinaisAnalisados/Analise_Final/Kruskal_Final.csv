@@ -39,13 +39,13 @@ Abordagem01;7;0,9118
 Abordagem01;8;1
 Abordagem01;9;0,9412
 Abordagem01;10;0,9706
-DenseNet201      ;1;0,9429
-DenseNet201      ;2;0,9714
-DenseNet201      ;3;0,9412
-DenseNet201      ;4;0,9412
-DenseNet201      ;5;0,9412
-DenseNet201      ;6;0,9118
-DenseNet201      ;7;0,9118
-DenseNet201      ;8;0,8824
-DenseNet201      ;9;0,9412
-DenseNet201      ;10;0,9412
+DenseNet201;1;0,9429
+DenseNet201;2;0,9714
+DenseNet201;3;0,9412
+DenseNet201;4;0,9412
+DenseNet201;5;0,9412
+DenseNet201;6;0,9118
+DenseNet201;7;0,9118
+DenseNet201;8;0,8824
+DenseNet201;9;0,9412
+DenseNet201;10;0,9412
